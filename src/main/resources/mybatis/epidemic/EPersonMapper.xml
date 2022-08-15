@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.eperson.mapper.EPersonMapper">
+
+    <resultMap type="com.ruoyi.epidemic.eperson.domain.EPerson" id="EPersonResult">
+        <result property="id" column="id"/>
+        <result property="eNo" column="e_no"/>
+        <result property="eXh" column="e_xh"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="confirmd" column="confirmd"/>
+        <result property="sfzh" column="sfzh"/>
+        <result property="domicile" column="domicile"/>
+        <result property="address" column="address"/>
+        <result property="community" column="community"/>
+        <result property="reseau" column="reseau"/>
+        <result property="casesSource" column="cases_source"/>
+        <result property="profession" column="profession"/>
+        <result property="profession2" column="profession2"/>
+        <result property="reportTime" column="report_time"/>
+        <result property="reportDiagnosticTime" column="report_diagnostic_time"/>
+        <result property="controlSituation" column="control_situation"/>
+        <result property="firstPositiveReportTime" column="first_positive_report_time"/>
+        <result property="relatedCases" column="related_cases"/>
+        <result property="vaccination" column="vaccination"/>
+        <result property="firstPositiveSampleTime" column="first_positive_sample_time"/>
+        <result property="firstPositiveSamplePlace" column="first_positive_sample_place"/>
+        <result property="quarantine" column="quarantine"/>
+        <result property="quarantinePlace" column="quarantine_place"/>
+        <result property="roomNo" column="room_no"/>
+        <result property="quarantineTime" column="quarantine_time"/>
+        <result property="staywith" column="staywith"/>
+        <result property="firstPositiveTime" column="first_positive_time"/>
+        <result property="firstTestUnit" column="first_test_unit"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+    </resultMap>
+
+    <sql id="selectEPersonVo">
+        select id,
+               e_no,
+               e_xh,
+               name,
+               sfzh,
+               gender,
+               age,
+               confirmd,
+               domicile,
+               address,
+               community,
+               reseau,
+               cases_source,
+               profession,
+               profession2,
+               report_time,
+               report_diagnostic_time,
+               control_situation,
+               first_positive_report_time,
+               related_cases,
+               vaccination,
+               first_positive_sample_time,
+               first_positive_sample_place,
+               quarantine,
+               quarantine_place,
+               room_no,
+               quarantine_time,
+               staywith,
+               first_positive_time,
+               first_test_unit,
+               longitude,
+               latitude
+        from e_person
+    </sql>
+
+    <select id="selectEPersonList" parameterType="com.ruoyi.epidemic.eperson.domain.EPerson" resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        <where>
+            <if test="eNo != null  and eNo != ''">and e_no like concat('%', #{eNo}, '%')</if>
+            <if test="sfzh != null  and sfzh != ''">and sfzh like concat('%', #{sfzh}, '%')</if>
+            <if test="name != null  and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="gender != null  and gender != ''">and gender = #{gender}</if>
+            <if test="community != null  and community != ''">and community like concat('%', #{community}, '%')</if>
+        </where>
+        order by e_no
+    </select>
+
+    <select id="selectEPersonById" parameterType="Long" resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectEPersonBySfzh" resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        where sfzh = #{sfzh}
+    </select>
+
+    <insert id="insertEPerson" parameterType="com.ruoyi.epidemic.eperson.domain.EPerson" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into e_person
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eNo != null">e_no,</if>
+            <if test="eXh != null">e_xh,</if>
+            <if test="name != null">name,</if>
+            <if test="sfzh != null">sfzh,</if>
+            <if test="gender != null">gender,</if>
+            <if test="age != null">age,</if>
+            <if test="confirmd != null">confirmd,</if>
+            <if test="domicile != null">domicile,</if>
+            <if test="address != null">address,</if>
+            <if test="community != null">community,</if>
+            <if test="reseau != null">reseau,</if>
+            <if test="casesSource != null">cases_source,</if>
+            <if test="profession != null">profession,</if>
+            <if test="profession2 != null">profession2,</if>
+            <if test="reportTime != null">report_time,</if>
+            <if test="reportDiagnosticTime != null">report_diagnostic_time,</if>
+            <if test="controlSituation != null">control_situation,</if>
+            <if test="firstPositiveReportTime != null">first_positive_report_time,</if>
+            <if test="relatedCases != null">related_cases,</if>
+            <if test="vaccination != null">vaccination,</if>
+            <if test="firstPositiveSampleTime != null">first_positive_sample_time,</if>
+            <if test="firstPositiveSamplePlace != null">first_positive_sample_place,</if>
+            <if test="quarantine != null">quarantine,</if>
+            <if test="quarantinePlace != null">quarantine_place,</if>
+            <if test="roomNo != null">room_no,</if>
+            <if test="quarantineTime != null">quarantine_time,</if>
+            <if test="staywith != null">staywith,</if>
+            <if test="firstPositiveTime != null">first_positive_time,</if>
+            <if test="firstTestUnit != null">first_test_unit,</if>
+            <if test="longitude != null and longitude != ''">longitude,</if>
+            <if test="latitude != null and latitude != ''">latitude,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eNo != null">#{eNo},</if>
+            <if test="eXh != null">#{eXh},</if>
+            <if test="name != null">#{name},</if>
+            <if test="sfzh != null">#{sfzh},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="age != null">#{age},</if>
+            <if test="confirmd != null">#{confirmd},</if>
+            <if test="domicile != null">#{domicile},</if>
+            <if test="address != null">#{address},</if>
+            <if test="community != null">#{community},</if>
+            <if test="reseau != null">#{reseau},</if>
+            <if test="casesSource != null">#{casesSource},</if>
+            <if test="profession != null">#{profession},</if>
+            <if test="profession2 != null">#{profession2},</if>
+            <if test="reportTime != null">#{reportTime},</if>
+            <if test="reportDiagnosticTime != null">#{reportDiagnosticTime},</if>
+            <if test="controlSituation != null">#{controlSituation},</if>
+            <if test="firstPositiveReportTime != null">#{firstPositiveReportTime},</if>
+            <if test="relatedCases != null">#{relatedCases},</if>
+            <if test="vaccination != null">#{vaccination},</if>
+            <if test="firstPositiveSampleTime != null">#{firstPositiveSampleTime},</if>
+            <if test="firstPositiveSamplePlace != null">#{firstPositiveSamplePlace},</if>
+            <if test="quarantine != null">#{quarantine},</if>
+            <if test="quarantinePlace != null">#{quarantinePlace},</if>
+            <if test="roomNo != null">#{roomNo},</if>
+            <if test="quarantineTime != null">#{quarantineTime},</if>
+            <if test="staywith != null">#{staywith},</if>
+            <if test="firstPositiveTime != null">#{firstPositiveTime},</if>
+            <if test="firstTestUnit != null">#{firstTestUnit},</if>
+            <if test="longitude != null and longitude != ''">#{longitude},</if>
+            <if test="latitude != null and latitude != ''">#{latitude},</if>
+        </trim>
+    </insert>
+
+    <update id="updateEPerson" parameterType="com.ruoyi.epidemic.eperson.domain.EPerson">
+        update e_person
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eNo != null">e_no = #{eNo},</if>
+            <if test="eXh != null">e_xh = #{eXh},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sfzh != null">sfzh = #{sfzh},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="confirmd != null">confirmd = #{confirmd},</if>
+            <if test="domicile != null">domicile = #{domicile},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="community != null">community = #{community},</if>
+            <if test="reseau != null">reseau = #{reseau},</if>
+            <if test="casesSource != null">cases_source = #{casesSource},</if>
+            <if test="profession != null">profession = #{profession},</if>
+            <if test="profession2 != null">profession2 = #{profession2},</if>
+            <if test="reportTime != null">report_time = #{reportTime},</if>
+            <if test="reportDiagnosticTime != null">report_diagnostic_time = #{reportDiagnosticTime},</if>
+            <if test="controlSituation != null">control_situation = #{controlSituation},</if>
+            <if test="firstPositiveReportTime != null">first_positive_report_time = #{firstPositiveReportTime},</if>
+            <if test="relatedCases != null">related_cases = #{relatedCases},</if>
+            <if test="vaccination != null">vaccination = #{vaccination},</if>
+            <if test="firstPositiveSampleTime != null">first_positive_sample_time = #{firstPositiveSampleTime},</if>
+            <if test="firstPositiveSamplePlace != null">first_positive_sample_place = #{firstPositiveSamplePlace},</if>
+            <if test="quarantine != null">quarantine = #{quarantine},</if>
+            <if test="quarantinePlace != null">quarantine_place = #{quarantinePlace},</if>
+            <if test="roomNo != null">room_no = #{roomNo},</if>
+            <if test="quarantineTime != null">quarantine_time = #{quarantineTime},</if>
+            <if test="staywith != null">staywith = #{staywith},</if>
+            <if test="firstPositiveTime != null">first_positive_time = #{firstPositiveTime},</if>
+            <if test="firstTestUnit != null">first_test_unit = #{firstTestUnit},</if>
+            <if test="longitude != null and longitude != ''">longitude = #{longitude},</if>
+            <if test="latitude != null and latitude != ''">latitude = #{latitude},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEPersonById" parameterType="Long">
+        delete
+        from e_person
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteEPersonByIds" parameterType="String">
+        delete from e_person where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getData_Month" resultType="map">
+        SELECT
+        a.time,
+        b.allnum,
+        b.wzznum,
+        b.jwsrnum
+        FROM
+        (
+        SELECT
+        DATE_FORMAT(DATE_SUB(now(), INTERVAL ac MONTH), '%Y-%m' ) AS time
+        FROM
+        (
+        SELECT
+        ( @ai := @ai + 1 ) - 1 AS ac
+        FROM
+        -- 近三月 循环生成sql（例：近三月 nums=[1,2,3]）
+        (
+        <if test="nums != null and nums.length > 0">
+            <foreach collection="nums" item="item" index="index" separator=" UNION ">
+                SELECT #{item}
+            </foreach>
+        </if>
+        -- SELECT 1 UNION SELECT 2 UNION SELECT 3
+        ) ac1,
+        ( SELECT @ai := 0 ) xc0
+        ) ad
+        ) a
+        LEFT JOIN (
+        SELECT
+        count( confirmd != '0' OR NULL ) AS allnum,
+        count( p.confirmd = '2' OR NULL ) AS wzznum,
+        count( cases_source = '境外输入' OR NULL ) AS jwsrnum,
+        date_format( p.first_positive_report_time, '%Y-%m' ) AS time
+        FROM
+        e_person p
+
+        GROUP BY
+        date_format( p.first_positive_report_time, '%Y-%m' )
+        ) b ON a.time = b.time
+        ORDER BY
+        a.time
+
+    </select>
+
+    <select id="getConfirmed" resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        where confirmd != 0
+    </select>
+
+    <select id="queryAllTimeTable" resultType="map">
+        SELECT DATE_FORMAT(first_positive_report_time, '%Y-%m-%d') AS `day`,
+               count(1)                                            AS `price`
+        FROM e_person
+        WHERE confirmd != '0'
+        GROUP BY
+            DATE_FORMAT( first_positive_report_time, '%Y-%m-%d' )
+        ORDER BY
+            DATE_FORMAT( first_positive_report_time, '%Y-%m-%d' )
+    </select>
+
+    <select id="getViewPart1" resultType="map">
+        SELECT community,
+               count(1) AS num
+        FROM e_person
+        WHERE confirmd != '0'
+        GROUP BY
+            community
+    </select>
+    <select id="getViewPart2" resultType="java.util.Map">
+        SELECT cases_source,
+               count(1) AS num
+        FROM e_person
+        WHERE confirmd != '0'
+        GROUP BY
+            cases_source
+    </select>
+    <select id="getViewPart3" resultType="java.util.Map">
+        SELECT reseau,
+               count(1) AS num
+        FROM e_person
+        WHERE confirmd != '0'
+        GROUP BY
+            reseau
+        ORDER BY
+            reseau
+    </select>
+    <select id="getViewPart4" resultType="java.util.Map">
+        SELECT gender,
+               count(1) as num
+        FROM e_person
+        WHERE confirmd != '0'
+        GROUP BY
+            gender
+    </select>
+    <select id="getViewPart5" resultType="map">
+        SELECT nld,
+               sum(male)  male,
+               sum(fmale) fmale
+        FROM (
+                 SELECT IF
+                            (
+                                3 >= age AND age >= 0,
+                                '0-3岁',
+                                IF
+                                    (
+                                        age &lt;= 10 AND age >= 4,
+                                        '4-10岁',
+                                        IF
+                                            (
+                                                age &lt;= 20 AND age >= 11,
+                                                '11-20岁',
+                                                IF
+                                                    (
+                                                        age &lt;= 30 AND age >= 21,
+                                                        '21-30岁',
+                                                        IF
+                                                            (
+                                                                age &lt;= 40 AND age >= 31,
+                                                                '31-40岁',
+                                                                IF
+                                                                    (
+                                                                        age &lt;= 50 AND age >= 41,
+                                                                        '41-50岁',
+                                                                        IF
+                                                                            (
+                                                                                age &lt;= 60 AND age >= 51,
+                                                                                '51-60岁',
+                                                                                IF
+                                                                                    (
+                                                                                        age &lt;= 70 AND age >= 61,
+                                                                                        '61-70岁',
+                                                                                        IF
+                                                                                            (age &lt;= 80 AND age >= 71,
+                                                                                             '71-80岁',
+                                                                                             IF(age &lt;= 90 AND age >= 81, '81-90岁', '90岁以上'))
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )                       AS nld,
+                        sum(IF(gender = '0', 1, 0)) AS male,
+                        sum(IF(gender = '1', 1, 0)) AS fmale
+                 FROM e_person
+                 WHERE confirmd != '0'
+                 GROUP BY
+                     age
+                 ORDER BY
+                     age
+             ) h
+        GROUP BY h.nld
+    </select>
+    <select id="getBMapViewJWD" resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        where confirmd != '0' and longitude is not null and latitude is not null
+    </select>
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.keypalce.mapper.EKeyplaceMapper">
+    
+    <resultMap type="com.ruoyi.epidemic.keypalce.domain.EKeyplace" id="EKeyplaceResult">
+        <result property="id"    column="id"    />
+        <result property="keyPlace"    column="key_place"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="bz"    column="bz"    />
+    </resultMap>
+
+    <sql id="selectEKeyplaceVo">
+        select id, key_place, longitude, latitude, bz from e_keyplace
+    </sql>
+
+    <select id="selectEKeyplaceList" parameterType="com.ruoyi.epidemic.keypalce.domain.EKeyplace" resultMap="EKeyplaceResult">
+        <include refid="selectEKeyplaceVo"/>
+        <where>  
+            <if test="keyPlace != null  and keyPlace != ''"> and key_place like concat('%', #{keyPlace}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectEKeyplaceById" parameterType="Long" resultMap="EKeyplaceResult">
+        <include refid="selectEKeyplaceVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertEKeyplace" parameterType="com.ruoyi.epidemic.keypalce.domain.EKeyplace" useGeneratedKeys="true" keyProperty="id">
+        insert into e_keyplace
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="keyPlace != null and keyPlace != ''">key_place,</if>
+            <if test="longitude != null and longitude != ''">longitude,</if>
+            <if test="latitude != null and latitude != ''">latitude,</if>
+            <if test="bz != null and bz != ''">bz,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="keyPlace != null and keyPlace != ''">#{keyPlace},</if>
+            <if test="longitude != null and longitude != ''">#{longitude},</if>
+            <if test="latitude != null and latitude != ''">#{latitude},</if>
+            <if test="bz != null and bz != ''">#{bz},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEKeyplace" parameterType="com.ruoyi.epidemic.keypalce.domain.EKeyplace">
+        update e_keyplace
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="keyPlace != null and keyPlace != ''">key_place = #{keyPlace},</if>
+            <if test="longitude != null and longitude != ''">longitude = #{longitude},</if>
+            <if test="latitude != null and latitude != ''">latitude = #{latitude},</if>
+            <if test="bz != null and bz != ''">bz = #{bz},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEKeyplaceById" parameterType="Long">
+        delete from e_keyplace where id = #{id}
+    </delete>
+
+    <delete id="deleteEKeyplaceByIds" parameterType="String">
+        delete from e_keyplace where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

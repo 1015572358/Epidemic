@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <th:block th:include="include :: header('搜索自动补全')" />
+    <th:block th:include="include :: echarts-js" />
+    <script type="text/javascript" th:src="@{/BMap/bmapGL.min.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/map_load.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/echarts-gl.min.js}"></script>
+    <style type="text/css">
+        body,html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            font-family: "微软雅黑";
+        }
+
+        #allmap {
+            height: 100%;
+        }
+        .BMap_cpyCtrl {
+            display:none !important;
+        }
+        .anchorBL{
+            display:none !important;
+        }
+        .btn-wrap {
+            z-index: 999;
+            width: 400px;
+            position: fixed;
+            top: 30px;
+            left: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(265, 265, 265, 0.4);
+            box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+        }
+    </style>
+    <script>
+        //echarts对象
+        var myChart = null;
+    </script>
+</head>
+
+<body>
+<div id="allmap"></div>
+<div class="btn-wrap">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="input-group" style="width: 360px;">
+                <input type="text" class="form-control" id="namekey" placeholder="输入姓名或者社区查询" style="font-weight: bold">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-white dropdown-toggle" style="height: 31px" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    </ul>
+                </div>
+                <!-- /btn-group -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: bootstrap-suggest-js" />
+<th:block th:include="include :: bootstrap-typeahead-js" />
+<script>
+
+    //初始化echart--此处判断为避免多次初始化造成内存泄露
+    if (myChart == null || myChart == undefined) {
+        myChart = echarts.init(document.getElementById('allmap'));
+    }
+
+    option = {
+        // backgroundColor: '#404a59',
+        title: {
+            text: '',
+            subtext: '',
+            // sublink: 'http://www.pm25.in',
+
+            left: 'center',
+            top: '5%',
+
+            textStyle: {
+                color: '#fff'
+
+            }
+        },
+        tooltip:{
+            trigger:'item',
+            formatter:function(params){
+                return params.marker+params.seriesName+'</br>时间：'+params.data.time+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;地点：'+params.name;
+            }
+        },
+
+        bmap: {
+            center: [107.978285,21.553673],
+            zoom: 16,
+            altitudeScale: 10000,
+            roam: true,
+            mapStyle: {
+                styleJson: [
+                    {
+                        'featureType': 'land',     //调整土地颜色
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color': '#000000'
+                        }
+                    },
+                    {
+                        'featureType': 'building',   //调整建筑物颜色
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color': '#04406F'
+                        }
+                    },
+                    {
+                        'featureType': 'building',   //调整建筑物标签是否可视
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'highway',     //调整高速道路颜色
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color': '#015B99'
+                        }
+                    },
+                    {
+                        'featureType': 'highway',    //调整高速名字是否可视
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'arterial',   //调整一些干道颜色
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color':'#003051'
+                        }
+                    },
+                    {
+                        'featureType': 'arterial',
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'green',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'water',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color': '#044161'
+                        }
+                    },
+                    {
+                        'featureType': 'subway',    //调整地铁颜色
+                        'elementType': 'geometry.stroke',
+                        'stylers': {
+                            'color': '#003051'
+                        }
+                    },
+                    {
+                        'featureType': 'subway',
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'railway',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'railway',
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'all',     //调整所有的标签的边缘颜色
+                        'elementType': 'labels.text.stroke',
+                        'stylers': {
+                            'color': '#313131'
+                        }
+                    },
+                    {
+                        'featureType': 'all',     //调整所有标签的填充颜色
+                        'elementType': 'labels.text.fill',
+                        'stylers': {
+                            'color': '#FFFFFF'
+                        }
+                    },
+                    {
+                        'featureType': 'manmade',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'manmade',
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'local',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'local',
+                        'elementType': 'labels',
+                        'stylers': {
+                            'visibility': 'off'
+                        }
+                    },
+                    {
+                        'featureType': 'subway',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'lightness': -65
+                        }
+                    },
+                    {
+                        'featureType': 'railway',
+                        'elementType': 'all',
+                        'stylers': {
+                            'lightness': -40
+                        }
+                    },
+                    {
+                        'featureType': 'boundary',
+                        'elementType': 'geometry',
+                        'stylers': {
+                            'color': '#8b8787',
+                            'weight': '1',
+                            'lightness': -29
+                        }
+                    }]
+            }
+        },
+        series: [{
+            type: 'lines',
+            coordinateSystem: 'bmap',
+            polyline: true,
+            data: [],
+            silent: true,
+            lineStyle: {
+                normal: {
+                    // color: '#c23531',
+                    // color: 'rgb(200, 35, 45)',
+                    opacity: 0.2,
+                    width: 10
+                }
+            },
+            progressiveThreshold: 500,
+            progressive: 200
+        }, {
+            type: 'lines',
+            coordinateSystem: 'bmap',
+            polyline: true,
+            data: [],
+            lineStyle: {
+                normal: {
+                    width: 0
+                }
+            },
+            effect: {
+                constantSpeed: 50,
+                show: true,
+                trailLength: 0.5,
+                symbolSize: 3.5
+            },
+            zlevel: 1
+        },{
+            name:'轨迹点说明',
+            type: 'effectScatter',
+            coordinateSystem: 'bmap',
+            zlevel: 3,
+            rippleEffect: {
+                brushType: 'stroke'
+            },
+            label: {
+                normal: {
+                    show: true,
+                    position: 'right',
+                    formatter: ' {b}'
+                }
+            },
+            symbolSize: 12,
+            showEffectOn: 'render',
+            itemStyle: {
+                normal: {
+                    color: "red"
+                }
+            },
+            data: [],
+        }]
+    };
+
+    myChart.setOption(option);
+
+    var etrack;
+    var taobaoBsSuggest = $("#namekey").bsSuggest({
+        indexId: 4,                 // data.value 的第几个数据，作为input输入框的内容
+        indexKey: 2,                // data.value 的第几个数据，作为input输入框的内容
+        allowNoKeyword: false,      // 是否允许无关键字时请求数据
+        hideOnSelect: true,         // 鼠标从列表单击选择了值时，是否隐藏选择列表
+        multiWord: true,            // 以分隔符号分割的多关键字支持
+        separator: ",",             // 多关键字支持时的分隔符，默认为空格
+        getDataMethod: "url",       // 获取数据的方式，总是从 URL 获取
+        delay:500,
+        emptyTip:'暂未查询到数据',
+        effectiveFieldsAlias: {
+            Id: "序号",
+            Community:"所在社区",
+            Keyword: "姓名",
+            Age: "年龄",
+            sfzh:"身份证号",
+            trackCount:"轨迹点"
+        },
+        showHeader: true,
+        url: '/bmap/getTrack?namekey=',
+        /*优先从url ajax 请求 json 帮助数据，注意最后一个参数为关键字请求参数*/
+        // jsonp: 'callback',
+        /*如果从 url 获取数据，并且需要跨域，则该参数必须设置*/
+        processData: function (json) { // url 获取数据时，对数据的处理，作为 getData 的回调函数
+            var i, data = {
+                value: []
+            };
+
+
+            if (!json || !json.data || json.data.data.length == 0) {
+                return false;
+            }
+            etrack = json.data.data;
+            for (i = 0; i < json.data.data.length; i++) {
+                data.value.push({
+                    "Id": (i + 1),
+                    "Community":json.data.data[i].community,
+                    "Keyword": json.data.data[i].name,
+                    "Age": json.data.data[i].age,
+                    "sfzh":json.data.data[i].sfzh,
+                    "trackCount":json.data.data[i].trackCount,
+                });
+            }
+            return data;
+        }
+    }).on('onSetSelectValue', function (e, selectedData, selectedRawData) {
+        if(selectedRawData.trackCount>0){
+            let ROAD_LINE = "";
+            let pointData = [];
+            for (let j = 0; j < etrack.length; j++) {
+                if (etrack[j].sfzh == selectedData.id) {
+                    for (let k = 0; k < etrack[j].eTracks.length; k++) {
+                        ROAD_LINE += etrack[j].eTracks[k].longitude+","+etrack[j].eTracks[k].latitude + ";";
+                        pointData.push({
+                            name:etrack[j].eTracks[k].activePlace,
+                            time:etrack[j].eTracks[k].activeTime,
+                            value:[etrack[j].eTracks[k].longitude,etrack[j].eTracks[k].latitude]
+                        })
+                    }
+                    break;
+                }
+            }
+            if(ROAD_LINE.length>0){
+                ROAD_LINE = ROAD_LINE.substring(0,ROAD_LINE.length-1);
+            }
+           let tdata= [
+                {
+                    ROAD_LINE: ROAD_LINE
+                },
+            ];
+            var busLines = [];
+            var hStep = 300 / (tdata.length - 1);
+
+            var i = 0;
+            for (var x in tdata) {
+                // i++;
+                // if(i<5000)
+                //     continue;
+                var line = tdata[x];
+                // if(busLines.length>500)
+                //     break;
+                var pointString = line.ROAD_LINE;
+                var pointArr = pointString.split(';');
+                var lnglats = [];
+                for (var j in pointArr) {
+                    lnglats.push(pointArr[j].split(','))
+                }
+                busLines.push({
+                    coords: lnglats,
+                    lineStyle: {
+                        normal: {
+                            //color: echarts.color.modifyHSL('#5A94DF', Math.round(hStep * x))
+                            color: 'red'
+                        }
+                    }
+                })
+            }
+            option.series[0].data = busLines;
+            option.series[1].data = busLines;
+            option.series[2].data = pointData;
+            if(pointData.length>0){
+                option.bmap.center = pointData[0].value;
+                option.bmap.zoom = 17;
+            }
+            myChart.setOption(option);
+        } else {
+            $.modal.msgWarning('未找到相关轨迹');
+        }
+
+    });
+
+</script>
+</body>
+
+</html>

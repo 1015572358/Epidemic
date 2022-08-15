@@ -2,8 +2,12 @@ package com.ruoyi.project.system.user.controller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.epidemic.eperson.domain.EPerson;
+import com.ruoyi.epidemic.eperson.service.IEPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -45,6 +49,9 @@ public class IndexController extends BaseController
 
     @Autowired
     private RuoYiConfig ruoYiConfig;
+
+    @Autowired
+    private IEPersonService ePersonService;
 
     // 系统首页
     @GetMapping("/index")
@@ -134,7 +141,16 @@ public class IndexController extends BaseController
     public String main(ModelMap mmap)
     {
         mmap.put("version", ruoYiConfig.getVersion());
-        return "main";
+        //查询分析数据
+        List<EPerson> personList = this.ePersonService.getConfirmed();
+        int todaySize = personList.stream().filter(person ->
+                DateUtils.getDate().equals(DateUtils.parseDateToStr("yyyy-MM-dd", person.getFirstPositiveReportTime())
+                )).collect(Collectors.toList()).size();
+        int wzzSize = personList.stream().filter(person -> "2".equals(person.getConfirmd())).collect(Collectors.toList()).size();
+        mmap.put("todaySize",todaySize);
+        mmap.put("wzzSize",wzzSize);
+        mmap.put("TotalSize",personList.size());
+        return "epidemic/ztqk/ztqk";
     }
 
     // content-main class

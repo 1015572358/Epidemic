@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.etrack.mapper.ETrackMapper">
+
+    <resultMap type="com.ruoyi.epidemic.etrack.domain.ETrack" id="ETrackResult">
+        <id property="id" column="id"/>
+        <result property="eId" column="e_id"/>
+        <result property="sfzh" column="sfzh"/>
+        <result property="activeTime" column="active_time"/>
+        <result property="activePlace" column="active_place"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.epidemic.map.BMapTrack" id="BMapTrack">
+        <result property="id" column="eId"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="sfzh" column="esfzh"/>
+        <result property="community" column="community"/>
+        <collection property="eTracks" resultMap="ETrackResult"></collection>
+    </resultMap>
+
+
+    <sql id="selectETrackVo">
+        select id, e_id, sfzh, active_time, active_place, longitude, latitude
+        from e_track
+    </sql>
+
+    <select id="selectETrackList" parameterType="com.ruoyi.epidemic.etrack.domain.ETrack" resultMap="ETrackResult">
+        <include refid="selectETrackVo"/>
+        <where>
+            <if test="sfzh != null  and sfzh != ''">and sfzh = #{sfzh}</if>
+            <if test="eId != null  and eId != ''">and e_id = #{eId}</if>
+            <if test="activePlace != null  and activePlace != ''">and active_place = #{activePlace}</if>
+        </where>
+    </select>
+
+    <select id="selectETrackById" parameterType="Long" resultMap="ETrackResult">
+        <include refid="selectETrackVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertETrack" parameterType="com.ruoyi.epidemic.etrack.domain.ETrack" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into e_track
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eId != null">e_id,</if>
+            <if test="sfzh != null">sfzh,</if>
+            <if test="activeTime != null">active_time,</if>
+            <if test="activePlace != null">active_place,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eId != null">#{eId},</if>
+            <if test="sfzh != null">#{sfzh},</if>
+            <if test="activeTime != null">#{activeTime},</if>
+            <if test="activePlace != null">#{activePlace},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+        </trim>
+    </insert>
+
+    <update id="updateETrack" parameterType="com.ruoyi.epidemic.etrack.domain.ETrack">
+        update e_track
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eId != null">e_id = #{eId},</if>
+            <if test="sfzh != null">sfzh = #{sfzh},</if>
+            <if test="activeTime != null">active_time = #{activeTime},</if>
+            <if test="activePlace != null">active_place = #{activePlace},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteETrackById" parameterType="Long">
+        delete
+        from e_track
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteETrackByIds" parameterType="String">
+        delete from e_track where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insertOrupdatePl">
+        insert into e_track (id,e_id,sfzh,active_time,active_place,longitude,latitude) values
+        <foreach collection="list" item="p" separator=",">
+            (#{p.id} ,#{eid},#{sfzh},#{p.activeTime},#{p.activePlace},#{p.longitude},#{p.latitude})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        active_time=values(active_time),
+        active_place=values(active_place),
+        longitude=values(longitude),
+        latitude=values(latitude)
+    </insert>
+
+    <delete id="deleteETrackBysfzh">
+        delete
+        from e_track
+        where sfzh = #{sfzh}
+    </delete>
+
+    <delete id="deleteETrackByNotInIdArr">
+        delete from e_track where id not in
+        <foreach collection="idArr" item="p" separator="," open="(" close=")">
+            #{p}
+        </foreach>
+    </delete>
+
+    <select id="getBMapTrack" resultMap="BMapTrack">
+        select p.id 'eId',
+               p.name,
+               p.community,
+               p.age,
+               p.sfzh 'esfzh',
+               e.id,
+               e.e_id,
+               e.sfzh,
+               e.active_time,
+               e.active_place,
+               e.longitude,
+               e.latitude
+        from e_person p
+                 left join e_track e on p.id = e.e_id
+        where p.name like concat('%', #{name,jdbcType=VARCHAR}, '%')
+           or p.community like concat('%', #{name,jdbcType=VARCHAR}, '%')
+        order by e.active_time limit 10
+    </select>
+
+</mapper>

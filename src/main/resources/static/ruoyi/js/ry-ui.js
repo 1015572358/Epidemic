@@ -991,7 +991,7 @@ var table = {
             },
             // 选卡页同一页签打开
             parentTab: function (title, url) {
-                var dataId = window.frameElement.getAttribute('data-id');
+                var dataId = window.frameElement.getAttribute('data-id');modal/layer
                 createMenuItem(url, title);
                 closeItem(dataId);
             },

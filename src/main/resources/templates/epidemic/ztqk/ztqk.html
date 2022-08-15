@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('总体情况')" />
+</head>
+<style>
+    .ztqk-title{
+        background-color: #fff;
+        color: inherit;
+        padding: 5px 1px 5px 20px;
+        border-color: #e7eaec;
+        -webkit-border-image: none;
+        -o-border-image: none;
+        border-image: none;
+        border-style: solid solid none;
+        border-width: 1px 0;
+    }
+    img{
+        float: left;
+    }
+    .ztqk-title-font{
+        vertical-align:middle;
+        opacity: 1;
+        font-size: 24px;
+        font-weight: 500;
+        letter-spacing: 0px;
+        color: rgb(0, 0, 0);
+        position: relative;
+        float: left;
+        padding: 16px 0 0 15px;
+    }
+    .ztqk-title-date{
+        padding-top: 25px;
+        padding-right: 20px;
+        float: right;
+    }
+    .ztqk-title-date span{
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0px;
+        text-align: center;
+        color: rgb(255, 0, 0);
+        background-color: rgb(255, 255, 255);
+        position: relative;
+    }
+</style>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox">
+                <div class="ztqk-title">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <img th:src="@{/img/yq.png}" height="60px" width="60px">
+                            <div class="ztqk-title-font">新冠疫情动态总体情况</div>
+                        </div>
+                        <div class="col-sm-4">
+                                <div class="ztqk-title-date"><span>统计时间：</span><span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <span class="label label-success pull-right" style="cursor:pointer;" onclick="showCalendar(this,'1');">Today</span>
+                <h5>今日新增人数</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins"><span th:text="${todaySize}">0</span></h1>
+                <div class="stat-percent font-bold text-success">前一日新增人数：0</div>
+                <small>New apply</small>
+            </div>
+        </div>
+    </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-info pull-right" style="cursor:pointer;">Total</span>
+                    <h5>现有确诊人数</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><span th:text="${TotalSize}">0</span></h1>
+                    <small>Monthly bill</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-primary pull-right" style="cursor:pointer;">Asymptomatic</span>
+                    <h5>无症状感染人数</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><span th:text="${wzzSize}">0</span></h1>
+                    <small>Monthly Dobill</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-danger pull-right">Outside</span>
+                    <h5>境外输入</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><span th:text="0">0</span></h1>
+                    <small>Monthly TwiceBill</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div id="data_month" style="height: 400px;width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: echarts-js" />
+<script type="text/javascript" th:src="@{/js/zlDate.js}"></script>
+<link rel="stylesheet" th:href="@{/css/datepicker.css}">
+<script>
+    var marketChart = echarts.init(document.getElementById('data_month'));
+    marketoption = {
+        // color:['#23C6C8','#1AB394','#ED5565'],
+        title: {
+            text: '总体情况'
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#6a7985'
+                }
+            }
+        },
+        legend: {
+            data: ['现有确诊数','无症状人数','境外输入人数']
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: [
+            {
+                name: '现有确诊数',
+                type: 'line',
+                stack: '总量',
+                areaStyle: {
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            },
+            {
+                name: '无症状人数',
+                type: 'line',
+                stack: '总量',
+                areaStyle: {
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            },
+            {
+                name: '境外输入人数',
+                type: 'line',
+                stack: '总量',
+                areaStyle: {
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                data: []
+            }
+        ]
+    };
+    marketChart.setOption(marketoption);
+    $.ajax({
+        type : 'get',
+        async : true, //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+        url : '/epidemic/eperson/data_month',
+        data : "",
+        dataType : "json", //返回数据形式为json
+        success : function(data) {
+            marketChart.setOption({
+                series: [
+                    {data: data.allData},
+                    {data: data.wzzData},
+                    {data: data.jwsrData}
+                ],
+                xAxis: [
+                    {data: data.name}
+                ]
+            });
+        }
+    });
+</script>
+<script>
+    function showCalendar(e, id) {
+        // 接口获取价格日历数据【接入项目是请使用这里的代码】
+        $.get('/epidemic/eperson/queryAllTimeTable', function (data) {
+            pickerEvent.setPriceArr(eval(data));// 设置数据
+            pickerEvent.Init(e);// 开始初始化组件
+        });
+    }
+</script>
+</body>
+</html>

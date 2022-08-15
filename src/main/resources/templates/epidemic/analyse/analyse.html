@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>数据分析</title>
+    <script type="text/javascript" th:src="@{/BMap/vue.js}"></script>
+    <th:block th:include="include :: header('数据分析')" />
+    <style>
+        .echarts{
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>社区分布</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>发现方式</h5>
+                </div>
+                <div class="ibox-content">
+
+                    <div class="echarts" id="echarts2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>性别分布</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts4"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>年龄分布</h5>
+                </div>
+                <div class="ibox-content">
+
+                    <div class="echarts" id="echarts5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>网格分布（点击可缩放）</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: echarts-js" />
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            option1: {
+                title: {
+                    show:false,
+                    text: '',
+                    subtext: '',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    type: 'scroll',
+                    orient: 'vertical',
+                    right: 10,
+                    top: 20,
+                    bottom: 20,
+                    data: []
+                },
+                series: [
+                    {
+                        name: '所在社区',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['40%', '50%'],
+                        data: [],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            },
+            option2: {
+                title: {
+                    show:false,
+                    text: '',
+                    subtext: '',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    type: 'scroll',
+                    orient: 'vertical',
+                    right: 10,
+                    top: 20,
+                    bottom: 20,
+                    data: []
+                },
+                series: [
+                    {
+                        name: '所在社区',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['40%', '50%'],
+                        data: [],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            },
+            option3: {
+                tooltip: {//提示框组件
+                    trigger: 'item', //item数据项图形触发，主要在散点图，饼图等无类目轴的图表中使用。
+                    axisPointer: {
+                        // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                    },
+                    formatter: '{b} : {c} ' //{a}（系列名称），{b}（数据项名称），{c}（数值）, {d}（百分比）
+                },
+                grid:{
+                    left:'3%',
+                    right:'3%',
+                    bottom:'25%',
+                },
+                xAxis: {
+                    data: [],
+                    axisLabel: {
+                        rotate:45,
+                        color: '#000',
+                        textStyle: {
+                            fontSize:10,
+
+                        }
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLine: {
+                        show: false
+                    },
+                    z: 10
+                },
+                yAxis: {
+                    axisLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        color: '#999'
+                    }
+                },
+                dataZoom: [
+                    {
+                        type: 'inside'
+                    }
+                ],
+                series: [
+                    {
+                        type: 'bar',
+                        showBackground: true,
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#83bff6' },
+                                { offset: 0.5, color: '#188df0' },
+                                { offset: 1, color: '#188df0' }
+                            ])
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: '#2378f7' },
+                                    { offset: 0.7, color: '#2378f7' },
+                                    { offset: 1, color: '#83bff6' }
+                                ])
+                            }
+                        },
+                        data: []
+                    }
+                ]
+            },
+            option4: {
+                title: {
+                    text: "性别比例",
+
+                    left: "center",
+                    textStyle: {
+                        color: "#ADD1FF"
+                    }
+                },
+                tooltip: {
+                    trigger: "item",
+                    formatter: (params, ticket, callback) => {
+                        return `${params.seriesName}<br />${params.name}：${params.value}(${((params.value / 1000)* 100).toFixed(2)}%)`
+                    }
+                },
+                xAxis: {
+                    type: "value",
+                    splitLine: { //垂直x轴的线
+                        show: false
+                    },
+                    axisLine: { //x轴线
+                        show: false
+                    },
+                    axisLabel: { //x坐标标语
+                        show: false
+                    },
+                    axisTick: { //刻度
+                        show: false
+                    }
+                },
+                yAxis: [{
+                    type: "category",
+                    data: ["男", "女"],
+                    axisLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        margin: -4,
+                        textStyle: {
+                            color: "#fff",
+                            fontSize: 16
+                        }
+                    }
+                }],
+                series: [{
+                    name: "性别比例",
+                    type: "pictorialBar",
+                    symbolRepeat: "fixed",
+                    symbolMargin: "5%",
+                    symbolClip: true,
+                    symbolSize: 22.5,
+                    symbolPosition: "start",
+                    symbolOffset: [20, 0],
+                    data: [{
+                        value: 0, //男
+                        symbol: "image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAZRJREFUSA3tVLFKA0EQnbkEY1KFEDQYrCxsVARTRa21TZFf0EL8BysbsRErKwNqoWhnIViIWioqWCiWmihEsBECJnfj28QjR8zNHWKZgWVnZ3be2x3eLlNIK7xcFIVknYW/rEhk6XAofxKm1AqzaaFylSChEsYwSEZsp7EjIhymNhTBZ6IWI6ZYG5ATi3Qdba/9vVAEe8nZD5x8w4XB0Ve3OFd319oceM1leYq9VqpTDjlpYR4kcWwmfncs620g03cTRKQSFMuXow1Hjk3fu50SRPfReGT+IJ0vd8ubmNqiusimH7gpRm6sUbPXjO9nKgGK8sQQJrPTCcBMtolBS9OdOe9aJUD/+pnkgUROvUVNX3gfxFXsif/KeQIqgWffn90eQWDr1OcOGd5B64/QSsoH6VYIn4hiKsFkdja3AokWns9bPyfzGdBS+OgmDOZRdmbOzBqDSmDADYDHGrhVU/8mBpniArr1VKT3B9lei/6pRcwtaQokKj++GwugUN+BWwu9l/Cax/GitkGQhJ8hS3bdvDZ/A8dbeE6ZWY8dAAAAAElFTkSuQmCC",
+                    },
+                        {
+                            value: 0, //女
+                            symbol: "image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAr5JREFUSA3NVk1oE1EQnnn5q1Brd6WiZ8GiIFgQxYt49iAWbGiTrUREELUHDwpSIh4U8fciHipahWwSsFoRxKsUoYIUREQk4LEqan5aUOjupvucF3lh/7d48pEwb2a+me/NvHkhCGtYfOJlZqnevGIDzws4MiwpqlrEOweNuPBkHED4W43GTQ5wRmK5zc81680U6WelLUyyMIe0c86RPgWpS4nIfTbpc8pYApiZYYDcVylVlBLkzmRB+1gCzGZXkeMzbzACziKV4bV7dd/JvAChM8TTq8DTRHSYVJF0FnrTE8IXt2JLbB2tDkG7vd8GlmJgryM6bgOsUOkmsMScoo++jyKJJGjm9etiYqISAOLljRWtGIYJJaDkGiUvhQU67QmGI/1l7YnTJveBBL8KjzebhvmRA1clMEpSkp9JSOzoq+bqXlzgFFHyKZmcgs/TxOjeQGrNI7JfEHa69YE22Hd9GDL4CDqtAX5IgGkM3yiD2i3AzuR44jlXhtM3CPRWOOhA2aW8fsQDolDHcrUGYYXGZhemMk3LMGv0qBQHVJC3kpxtwyQbsNrWO6oiE9QqVwWmZRa7reFwsU8fr5mGcc2bXBAJG73Aq+tLo5+o1ksdG7XKAntS7OVyEaAN34WDevtaGc7cboxV9tHjKkiwVxLJ8eVceY9oFZ1+XvhJui7a1SIBoDvYqWxKf4YNI0arpi9Q6UPCHrEW1EFtL3x90dP6vbxVLWsfnFgfgXQ2x/RT1K7AyZAYKSnJSbU6PiV1pwwk4IVXPS1z8Rvn0O8Eh+0RoaH0bt+C93ZbXozrDrrOhwcMas1TCpwTX+ps5266frFB+EGnmxdf+tV+HpT8L8wVFaw0cqVpGvRjTi9Ddl+p5E84bUH74AqCkP9o+z8I6F34/j3QhPlsQUWuqQKWSDyg4C/dBIiLjPHprh6x+QOP5fUXvxzvJQAAAABJRU5ErkJggg==",
+                        }
+                    ],
+                    z: 10
+                },
+                    {
+                        name: "性别比例",
+                        type: "pictorialBar",
+                        itemStyle: {
+                            normal: {
+                                opacity: 0.2
+                            }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                fontSize:20,
+                                color:'#56B1FF',
+                                padding:[80,0,0,0]
+                            }
+                        },
+                        animationDuration: 0,
+                        symbolRepeat: "fixed",
+                        symbolMargin: "5%",
+                        symbolSize: 22.5,
+                        symbolPosition: "start",
+                        symbolOffset: [20, 0],
+                        data: [{
+                            value: 0, //男
+                            symbol: "image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAZRJREFUSA3tVLFKA0EQnbkEY1KFEDQYrCxsVARTRa21TZFf0EL8BysbsRErKwNqoWhnIViIWioqWCiWmihEsBECJnfj28QjR8zNHWKZgWVnZ3be2x3eLlNIK7xcFIVknYW/rEhk6XAofxKm1AqzaaFylSChEsYwSEZsp7EjIhymNhTBZ6IWI6ZYG5ATi3Qdba/9vVAEe8nZD5x8w4XB0Ve3OFd319oceM1leYq9VqpTDjlpYR4kcWwmfncs620g03cTRKQSFMuXow1Hjk3fu50SRPfReGT+IJ0vd8ubmNqiusimH7gpRm6sUbPXjO9nKgGK8sQQJrPTCcBMtolBS9OdOe9aJUD/+pnkgUROvUVNX3gfxFXsif/KeQIqgWffn90eQWDr1OcOGd5B64/QSsoH6VYIn4hiKsFkdja3AokWns9bPyfzGdBS+OgmDOZRdmbOzBqDSmDADYDHGrhVU/8mBpniArr1VKT3B9lei/6pRcwtaQokKj++GwugUN+BWwu9l/Cax/GitkGQhJ8hS3bdvDZ/A8dbeE6ZWY8dAAAAAElFTkSuQmCC",
+                        },
+                            {
+                                value: 0, //女
+                                symbol: "image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAr5JREFUSA3NVk1oE1EQnnn5q1Brd6WiZ8GiIFgQxYt49iAWbGiTrUREELUHDwpSIh4U8fciHipahWwSsFoRxKsUoYIUREQk4LEqan5aUOjupvucF3lh/7d48pEwb2a+me/NvHkhCGtYfOJlZqnevGIDzws4MiwpqlrEOweNuPBkHED4W43GTQ5wRmK5zc81680U6WelLUyyMIe0c86RPgWpS4nIfTbpc8pYApiZYYDcVylVlBLkzmRB+1gCzGZXkeMzbzACziKV4bV7dd/JvAChM8TTq8DTRHSYVJF0FnrTE8IXt2JLbB2tDkG7vd8GlmJgryM6bgOsUOkmsMScoo++jyKJJGjm9etiYqISAOLljRWtGIYJJaDkGiUvhQU67QmGI/1l7YnTJveBBL8KjzebhvmRA1clMEpSkp9JSOzoq+bqXlzgFFHyKZmcgs/TxOjeQGrNI7JfEHa69YE22Hd9GDL4CDqtAX5IgGkM3yiD2i3AzuR44jlXhtM3CPRWOOhA2aW8fsQDolDHcrUGYYXGZhemMk3LMGv0qBQHVJC3kpxtwyQbsNrWO6oiE9QqVwWmZRa7reFwsU8fr5mGcc2bXBAJG73Aq+tLo5+o1ksdG7XKAntS7OVyEaAN34WDevtaGc7cboxV9tHjKkiwVxLJ8eVceY9oFZ1+XvhJui7a1SIBoDvYqWxKf4YNI0arpi9Q6UPCHrEW1EFtL3x90dP6vbxVLWsfnFgfgXQ2x/RT1K7AyZAYKSnJSbU6PiV1pwwk4IVXPS1z8Rvn0O8Eh+0RoaH0bt+C93ZbXozrDrrOhwcMas1TCpwTX+ps5266frFB+EGnmxdf+tV+HpT8L8wVFaw0cqVpGvRjTi9Ddl+p5E84bUH74AqCkP9o+z8I6F34/j3QhPlsQUWuqQKWSDyg4C/dBIiLjPHprh6x+QOP5fUXvxzvJQAAAABJRU5ErkJggg==",
+                            }
+                        ],
+                        z: 5
+                    },
+                ]
+            },
+            option5: {
+                legend:{
+                    orient: 'horizontal', // 'vertical'
+                    x: '26%', // 'center' | 'left' | {number},
+                    y: 'top', // 'center' | 'bottom' | {number}
+                    data: [
+                        {
+                            name:'女性年龄分布',
+                            textStyle:{
+                                fontWeight:'bolder',
+                                padding: [10, 100, 15, 0]
+                                // color:'#cccccc'
+                            },
+                            icon:'image://data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5' +
+                                'rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMzcuOTYgNjkuNSI+CiAgPGRlZnM+CiAgICA8c3R5' +
+                                'bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogdXJsKCNsaW5lYXItZ3JhZGllbnQpOwogICAgICB9CiAgICA8L3N0eWxlP' +
+                                'gogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIwLjUiIHgyPSIwLjUiIHkyPSIxIiBncmFkaWVudF' +
+                                'VuaXRzPSJvYmplY3RCb3VuZGluZ0JveCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzAzZWJiNyIvPgogICA' +
+                                'gICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMGEzN2YiIHN0b3Atb3BhY2l0eT0iMC42OTQiLz4KICAgIDwvbGluZWFy' +
+                                'R3JhZGllbnQ+CiAgPC9kZWZzPgogIDxnIGlkPSLnu4RfMjkwOSIgZGF0YS1uYW1lPSLnu4QgMjkwOSIgdHJhbnNmb3JtPSJ0cmFuc' +
+                                '2xhdGUoMC4wNjIpIj4KICAgIDxwYXRoIGlkPSLot6/lvoRfMjM3IiBkYXRhLW5hbWU9Iui3r+W+hCAyMzciIGNsYXNzPSJjbHMtMS' +
+                                'IgZD0iTTc5LjQzNiwxMC40NjdBMTAuNTE4LDEwLjUxOCwwLDEsMCw2OC45MjUsMjAuOTM0LDEwLjUxMiwxMC41MTIsMCwwLDAsNzk' +
+                                'uNDM2LDEwLjQ2N1ptMCwwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtNDkuOTg2KSIvPgogICAgPHBhdGggaWQ9Iui3r+W+hF8yMzgi' +
+                                'IGRhdGEtbmFtZT0i6Lev5b6EIDIzOCIgY2xhc3M9ImNscy0xIiBkPSJNMzcuNzg1LDE3Ni4wODNsLTUuNzU1LTIyLjVhMTMuNDE5L' +
+                                'DEzLjQxOSwwLDAsMC0yNi4xODItLjIxN2wtNS44LDIyLjdhMy44MjUsMy44MjUsMCwwLDAsLjY2NywzLjIxOCwzLjc1OCwzLjc1OC' +
+                                'wwLDAsMCwyLjkyOCwxLjQ3OXMyLjgyNy4wNTgsNS4wNi4wNzJjLjcyNSwyLjE0NiwxLjc4Myw1LjI5MiwyLjc1NCw4LjM1QTMuNzI' +
+                                'xLDMuNzIxLDAsMCwwLDE1LDE5MS43NjloNy44NThhMy42NzcsMy42NzcsMCwwLDAsMy41MDgtMi41NTJjLjk3MS0zLjA1OSwyLjA1' +
+                                'OS02LjMwNiwyLjc2OS04LjQ1MiwyLjIzMy0uMDE1LDUuMDYtLjAyOSw1LjA2LS4wMjlhMy43NjYsMy43NjYsMCwwLDAsMi45MjgtM' +
+                                'S40NjQsMy42ODUsMy42ODUsMCwwLDAsLjY2Ny0zLjE4OVptMCwwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0xMjIuMjY5KSIvPg' +
+                                'ogIDwvZz4KPC9zdmc+Cg=='
+                        },
+                        {
+                            name:'男性年龄分布',
+                            textStyle:{
+                                fontSize:12,
+                                fontWeight:'bolder'
+                            },
+                            icon: 'image://data:image/svg+xml;base64,PHN2ZyBpZD0i57uEXzI5MDgiIGRhdGEtbmFtZT0i57uEIDI5MDgiIHhtbG5zPSJodHR' +
+                                'wOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9' +
+                                'IjAgMCAzNi45OTkgNzEuNDgiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6IHVybCgjb' +
+                                'GluZWFyLWdyYWRpZW50KTsKICAgICAgfQogICAgPC9zdHlsZT4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW' +
+                                '50IiB4MT0iMC41IiB5MT0iLTAuMzU2IiB4Mj0iMC41IiB5Mj0iMSIgZ3JhZGllbnRVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giPgo' +
+                                'gICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxYmM4ZmMiIHN0b3Atb3BhY2l0eT0iMC43OCIvPgogICAgICA8c3Rv' +
+                                'cCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMTg0YjkiIHN0b3Atb3BhY2l0eT0iMC42OTQiLz4KICAgIDwvbGluZWFyR3JhZGllb' +
+                                'nQ+CiAgPC9kZWZzPgogIDxwYXRoIGlkPSLot6/lvoRfMjM1IiBkYXRhLW5hbWU9Iui3r+W+hCAyMzUiIGNsYXNzPSJjbHMtMSIgZD' +
+                                '0iTTEyLjg5MSwxNDguMzc5QTE4Ljg3NiwxOC44NzYsMCwwLDAsMCwxNjYuNDg2djEyLjkyMWExLjE2NywxLjE2NywwLDAsMCwxLjE' +
+                                '1NiwxLjE1Nkg3LjM5NHYxNS42YS45NzQuOTc0LDAsMCwwLC45NzguOTYzSDI4LjYyN2EuOTc0Ljk3NCwwLDAsMCwuOTc4LS45NjN2' +
+                                'LTE1LjZoNC44MTZBMi41OCwyLjU4LDAsMCwwLDM3LDE3Ny45ODRWMTY1LjMzYzAtMTEuNjQ3LTEyLjEyMS0yMC43NDUtMjQuMTA4L' +
+                                'TE2Ljk1MVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgLTEyNS42NDkpIi8+CiAgPHBhdGggaWQ9Iui3r+W+hF8yMzYiIGRhdGEtbm' +
+                                'FtZT0i6Lev5b6EIDIzNiIgY2xhc3M9ImNscy0xIiBkPSJNNzMuOCwxMC43QTEwLjc1LDEwLjc1LDAsMSwwLDYzLjA1OCwyMS40LDE' +
+                                'wLjc0NCwxMC43NDQsMCwwLDAsNzMuOCwxMC43Wm0wLDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC00NC41NSkiLz4KPC9zdmc+Cg=='
+                        }
+                    ]
+
+                },
+                // tooltip（提示框组件）
+                tooltip: {
+                    //trigger(触发类型)，可选'item','axis','none'
+                    trigger: 'axis',
+                    axisPointer: {
+                        //指示器类型,可选'line','shadow','cross'
+                        type: 'shadow'
+                    },
+                    // 自定义提示内容
+                    formatter: function(a){
+                        var v = a[0];
+                        return v.name + '<br/>' + v.marker +v.seriesName + '：'+ Math.abs(v.value);
+                    }
+                },
+                xAxis: [{
+                    type: 'value',
+                    min:-100,max:0,
+                    gridIndex: 0,
+                    axisTick:{show: false, inside:false},
+                    axisLabel : {show: false},
+                    axisLine: {// Y轴轴线样式
+                        show: false,
+                        lineStyle:{
+                            color:'#000',
+                        }
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                },{
+                    type: 'value',
+                    gridIndex: 1, min:0,max:100,
+                    axisTick:{show: false}, //是否显示刻度
+                    axisLine: {// Y轴轴线样式
+                        show: false, // 是否显示X轴
+                        lineStyle:{
+                            color:'#000',
+                        }
+                    },
+                    axisLabel : {
+                        show: false //是否显示X轴内容
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }],
+                yAxis: [{
+                    type: 'category',
+                    gridIndex: 0,
+                    inverse: true,
+                    data: [],
+                    axisTick:{show:false},
+                    axisLabel : {show:false},
+                    axisLine: {// Y轴轴线样式
+                        show: false,
+                        lineStyle:{
+                            color:'#000',
+                        }
+                    }
+                },{
+                    type: 'category',
+                    gridIndex: 1,
+                    inverse: true,
+                    data: [],
+                    axisTick:{show:false},
+                    axisLabel : {
+                    },
+                    axisLine: {
+                        show: false //是否显示轴线
+                    }
+                }
+                ],
+                grid: [{
+                    top: 50,
+                    width: '40%',
+                    left: 35,gridIndex: 0,
+                    bottom:10,
+                }, {
+                    top: 50,
+                    left: '52%',gridIndex: 1,
+                    bottom:10,
+                }],
+                color:['#2FACFA','#F5A623'],
+                series: [
+                    {
+                        name: '女性年龄分布',
+                        type: 'bar',
+                        barWidth:'8',
+                        gridIndex: 0,
+                        itemStyle:{
+                            normal: {
+                                show: true,
+                                color: '#5de3e1',
+                                barBorderRadius:50,
+                                borderWidth:0,
+                                borderColor:'#333',
+                                label:{
+                                    show:true,position:'left',
+                                    formatter:function(v){
+                                        return (v.value * -1);
+                                    }
+                                }
+                            }
+                        },
+                        data: []
+                    },
+                    {
+                        name: '男性年龄分布',
+                        type: 'bar',
+                        barWidth:'8',
+                        xAxisIndex: 1,
+                        yAxisIndex: 1,
+                        itemStyle:{
+                            normal: {
+                                show: true,
+                                color: '#8A3EEB',
+                                barBorderRadius:50,
+                                borderWidth:0,
+                                borderColor:'#333',
+                                label:{
+                                    show:true,position:'right',
+                                    formatter:function(v){
+                                        return v.value;
+                                    }
+                                }
+                            }
+                        },
+                        data: []
+                    }
+
+                ]
+            }
+        },
+        created:function (){
+            this.queryView();
+        },
+        methods:{
+            queryView(){
+                let _this = this;
+                $.get("/analyse/view", {}, function (data) {
+                    _this.option1.series[0].data = [];
+                    _this.option1.legend.data = [];
+                    data.data.part1.forEach(function (item) {
+                        _this.option1.series[0].data.push({name:item.community,value:item.num});
+                        _this.option1.legend.data.push(item.community);
+                    });
+
+                    _this.option2.series[0].data = [];
+                    _this.option2.legend.data = [];
+                    data.data.part2.forEach(function (item) {
+                        _this.option2.series[0].data.push({name:item.cases_source,value:item.num});
+                        _this.option2.legend.data.push(item.cases_source);
+                    });
+
+                    data.data.part3.forEach(function (item) {
+                        _this.option3.xAxis.data.push(item.reseau);
+                        _this.option3.series[0].data.push(item.num);
+                    });
+
+                    data.data.part4.forEach(function (item) {
+                        if(item.gender == '0'){
+                            _this.option4.series[0].data[0].value = item.num;
+                            _this.option4.series[1].data[0].value = item.num;
+                        } else if(item.gender == '1'){
+                            _this.option4.series[0].data[1].value = item.num;
+                            _this.option4.series[1].data[1].value = item.num;
+                        }
+                    });
+
+                    data.data.part5.forEach(function (item) {
+                        _this.option5.yAxis[0].data.push(item.nld);
+                        _this.option5.yAxis[1].data.push(item.nld);
+                        _this.option5.series[0].data.push(0 - item.fmale);
+                        _this.option5.series[1].data.push(item.male);
+                    });
+
+
+
+                    var myChart1 = echarts.init(document.getElementById('echarts1'));
+                    var myChart2 = echarts.init(document.getElementById('echarts2'));
+                    var myChart3 = echarts.init(document.getElementById('echarts3'));
+                    var myChart4 = echarts.init(document.getElementById('echarts4'));
+                    var myChart5 = echarts.init(document.getElementById('echarts5'));
+
+                    // Enable data zoom when user click bar.
+                    const zoomSize = 6;
+                    myChart3.on('click', function (params) {
+                        myChart3.dispatchAction({
+                            type: 'dataZoom',
+                            startValue: _this.option3.xAxis.data[Math.max(params.dataIndex - zoomSize / 2, 0)],
+                            endValue:
+                                _this.option3.xAxis.data[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+                        });
+                    });
+
+
+
+
+                    //自适应
+                    window.addEventListener('resize', function() {
+                        myChart2.resize(); //初始化的
+                        myChart1.resize();
+                        myChart3.resize();
+                        myChart4.resize();
+                        myChart5.resize();
+                    });
+
+
+                    myChart1.setOption(_this.option1);
+                    myChart2.setOption(_this.option2);
+                    myChart3.setOption(_this.option3);
+                    myChart4.setOption(_this.option4);
+                    myChart5.setOption(_this.option5);
+                });
+            },
+        }
+
+    });
+</script>
+</body>
+</html>

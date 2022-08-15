@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.monitor.mapper.EMonitorMapper">
+    
+    <resultMap type="com.ruoyi.epidemic.monitor.domain.EMonitor" id="EMonitorResult">
+        <result property="id"    column="id"    />
+        <result property="monitorPlace"    column="monitor_place"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="bz"    column="bz"    />
+    </resultMap>
+
+    <sql id="selectEMonitorVo">
+        select id, monitor_place, longitude, latitude, bz from e_monitor
+    </sql>
+
+    <select id="selectEMonitorList" parameterType="com.ruoyi.epidemic.monitor.domain.EMonitor" resultMap="EMonitorResult">
+        <include refid="selectEMonitorVo"/>
+        <where>  
+            <if test="monitorPlace != null  and monitorPlace != ''"> and monitor_place like concat('%', #{monitorPlace}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectEMonitorById" parameterType="Long" resultMap="EMonitorResult">
+        <include refid="selectEMonitorVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertEMonitor" parameterType="com.ruoyi.epidemic.monitor.domain.EMonitor">
+        insert into e_monitor
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="monitorPlace != null">monitor_place,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="bz != null">bz,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="monitorPlace != null">#{monitorPlace},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="bz != null">#{bz},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEMonitor" parameterType="com.ruoyi.epidemic.monitor.domain.EMonitor">
+        update e_monitor
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="monitorPlace != null">monitor_place = #{monitorPlace},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="bz != null">bz = #{bz},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEMonitorById" parameterType="Long">
+        delete from e_monitor where id = #{id}
+    </delete>
+
+    <delete id="deleteEMonitorByIds" parameterType="String">
+        delete from e_monitor where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('主子表提交')" />
+    <th:block th:include="include :: datetimepicker-css" />
+    <style type="text/css">
+        table label.error{position: inherit;}select + label.error{z-index:1;right:40px;}
+    </style>
+</head>
+<body class="gray-bg">
+    <div class="main-content">
+        <form id="form-add" class="form-horizontal" th:object="${person}">
+            <h4 class="form-header h4">人员基础信息</h4>
+            <input name="id" id="eid" th:field="*{id}" type="hidden">
+            <div class="row">
+            	<div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">姓名：</label>
+                        <div class="col-sm-8">
+                            <input name="name" th:field="*{name}" class="form-control" type="text" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-disabled">性别：</label>
+                        <div class="col-sm-8">
+                            <select name="gender" class="form-control m-b" th:with="type=${@dict.getType('sys_user_sex')}" readonly>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{gender}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">年龄：</label>
+                        <div class="col-sm-8">
+                            <input name="age" th:field="*{age}" class="form-control" type="text" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-disabled">身份证号：</label>
+                        <div class="col-sm-8">
+                            <input name="sfzh" th:field="*{sfzh}" class="form-control" type="text" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">职业：</label>
+                        <div class="col-sm-8">
+                            <textarea name="profession" class="form-control" readonly>[[*{profession}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-disabled">职业（副）：</label>
+                        <div class="col-sm-8">
+                            <textarea name="profession2" class="form-control" readonly>[[*{profession2}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">现住址：</label>
+                        <div class="col-sm-8">
+                            <textarea name="address" class="form-control" readonly>[[*{address}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-disabled">户籍地：</label>
+                        <div class="col-sm-8">
+                            <textarea name="domicile" class="form-control" readonly>[[*{domicile}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="form-header h4">轨迹信息</h4>
+            <div class="row">
+                <div class="col-sm-12">
+                    <button type="button" class="btn btn-white btn-sm" onclick="addRow()"><i class="fa fa-plus"> 增加</i></button>
+                    <button type="button" class="btn btn-white btn-sm" onclick="sub.delRow()"><i class="fa fa-minus"> 删除</i></button>
+                    <div class="col-sm-12 select-table table-striped">
+					    <table id="bootstrap-table"></table>
+					</div>
+                </div>
+            </div>
+        </form>
+    </div>
+      
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:src="@{/js/jquery.tmpl.js}"></script>
+	<script th:inline="javascript">
+	    $(function() {
+	    	// 初始化数据, 可以由后台传过来
+
+		    var options = {
+		    	data: [],
+                pagination: false,
+		        showSearch: false,
+                showRefresh: false,
+                showToggle: false,
+                showColumns: false,
+                sidePagination: "client",
+		        columns: [{
+		            checkbox: true
+		        },
+		        {
+		        	field: 'index',
+		        	align: 'center',
+		        	title: "序号",
+                    formatter: function (value, row, index) {
+                    	var columnIndex = $.common.sprintf("<input type='hidden' name='index' value='%s'>", $.table.serialNumber(index));
+                    	var columnId = $.common.sprintf("<input type='hidden' class='idFlag' name='etrack[%s].id' value='%s'>", index, row.id);
+                    	return columnIndex + $.table.serialNumber(index) + columnId;
+                    }
+                },
+                {
+                    field: 'activeTime',
+                    align: 'center',
+                    title: '时间',
+                    width: '200px',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control etrackTime' type='text' name='etrack[%s].activeTime'   value='%s' placeholder='yyyy-MM-dd HH:mm:ss'>", index, value);
+                        return html;
+                    }
+                },
+		        {
+		            field: 'activePlace',
+		            align: 'center',
+		            title: '地点/事件',
+                    width:'350px',
+		            formatter: function(value, row, index) {
+		            	var html = $.common.sprintf("<textarea class='form-control etrackactivePlace' name='etrack[%s].activePlace'>%s</textarea>", index, value);
+		        		return html;
+                    }
+		        },
+
+		        {
+		            field: 'longitude',
+		            align: 'center',
+		            title: '经度',
+		            formatter: function(value, row, index) {
+		            	var html = $.common.sprintf("<input class='form-control etracklongitude' type='text' name='etrack[%s].longitude' value='%s'>", index, value);
+		        		return html;
+                    }
+		        },
+                {
+                    field: 'latitude',
+                    align: 'center',
+                    title: '纬度',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control etracklatitude' type='text' name='etrack[%s].latitude' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+		        {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                    	var value = $.common.isNotEmpty(row.index) ? row.index : $.table.serialNumber(index);
+                        return '<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="sub.delRowByIndex(\'' + value + '\')"><i class="fa fa-remove"></i>删除</a>';
+                    }
+                }]
+		    };
+
+            $.get('/epidemic/etrack/getTrackByeId/'+$('#eid').val(),'',function (data) {
+                let dataVO = data.data;
+                let trackdata = [];
+                for (let i = 0; i < dataVO.length; i++) {
+                    trackdata.push({
+                        id:dataVO[i].id,
+                        activeTime: dataVO[i].activeTime,
+                        activePlace: dataVO[i].activePlace,
+                        longitude: dataVO[i].longitude,
+                        latitude: dataVO[i].latitude,
+                    })
+                }
+                options.data = trackdata;
+                $.table.init(options);
+            });
+		});
+	    
+        $.validator.addMethod("etrackTime", function(value, element) {
+            return !this.optional(element);
+        }, "时间必填。");
+        $.validator.addMethod("etrackactivePlace", function(value, element) {
+            return !this.optional(element);
+        }, "地点必填。");
+        $.validator.addMethod("etracklongitude", function(value, element) {
+            return !this.optional(element);
+        }, "经度必填。");
+        $.validator.addMethod("etracklatitude", function(value, element) {
+            return !this.optional(element);
+        }, "纬度必填。");
+        
+        /* 主子表-提交 */
+        function submitHandler(index, layero){
+            let idArr = [];
+            if ($.validate.form()) {
+                $("#bootstrap-table").find("input[class='idFlag']").each(function (){
+                    idArr.push($(this).val());
+                });
+                var data = $("#form-add").serializeArray();
+                data.push({name:"idArr",value:idArr});
+                $.operate.saveModal("/epidemic/etrack/addPL", data);
+            }
+        }
+	    
+        function addRow() {
+        	var count = $("#" + table.options.id).bootstrapTable('getData').length;
+        	var row = {
+                index: $.table.serialNumber(count),
+                activeTime: "",
+                activePlace: "",
+                longitude: "",
+                latitude: "",
+            }
+        	sub.addRow(row);
+        }
+        
+        $("#bootstrap-table").on("post-body.bs.table", function (e, args) {
+            layui.use('laydate', function(){
+                var laydate = layui.laydate;
+                laydate.render({
+                    elem: 'input[name$=\'activeTime\']',
+                    type: 'datetime',
+                    trigger: 'click'
+                });
+            });
+    	});
+    </script>
+</body>
+</html>

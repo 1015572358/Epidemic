@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>疫情监控</title>
+    <style type="text/css">
+        html,body,#container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0
+        }
+
+        ul li {
+            list-style: none;
+        }
+        .btn-wrap {
+            z-index: 999;
+            width: 226px;
+            position: fixed;
+            bottom: 30px;
+            left: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(265, 265, 265, 0.9);
+            box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+        }
+        .btn {
+            width: 100px;
+            height: 30px;
+            float: left;
+            background-color: #fff;
+            color: rgba(27, 142, 236, 1);
+            font-size: 14px;
+            border:1px solid rgba(27, 142, 236, 1);
+            border-radius: 5px;
+            margin: 0 5px 6px;
+            text-align: center;
+            line-height: 30px;
+        }
+        .btn:hover {
+            background-color: rgba(27, 142, 236, 0.8);
+            color: #fff;
+            cursor: pointer;
+        }
+        .BMap_cpyCtrl {
+            display:none !important;
+        }
+        .anchorBL{
+            display:none !important;
+        }
+    </style>
+
+    <script type="text/javascript" th:src="@{/BMap/map_load.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/MarkerClusterer_min.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/TextIconOverlay_min.js}"></script>
+</head>
+
+<body>
+<div id="container"></div>
+<ul class="btn-wrap" style="z-index: 99;">
+    <li class = "btn" onclick = "showRy()">显示病例</li>
+    <li class = "btn" onclick = "hideRy()">隐藏病例</li>
+    <li class = "btn" onclick = "showKey()">显示重要场所</li>
+    <li class = "btn" onclick = "hideKey()">隐藏重要场所</li>
+    <li class = "btn" onclick = "showMoni()">显示监测点</li>
+    <li class = "btn" onclick = "hideMoni()">隐藏监测点</li>
+</ul>
+<th:block th:include="include :: footer" />
+<script type="text/javascript">
+    var outputPath = 'tiles/';    //地图瓦片所在的文件夹
+    var fromat = ".jpg";    //格式
+
+    /*var tileLayer = new BMap.TileLayer();
+    tileLayer.getTilesUrl = function (tileCoord, zoom) {
+        var x = tileCoord.x;
+        var y = tileCoord.y;
+        var url = outputPath + zoom + '/' + x + '/' + y + fromat;
+        return url;
+    }
+    var tileMapType = new BMap.MapType('tileMapType', tileLayer);*/
+
+    var map = new BMap.Map("container",{minZoom:13,maxZoom:19});
+
+    var point = new BMap.Point(108.001911,21.564126);  // 创建点坐标
+    map.centerAndZoom(point, 15);                 // 初始化地图，设置中心点坐标和地图级别
+    // //添加地图类型控件
+    map.addControl(new BMap.MapTypeControl({
+        mapTypes:[
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]}));
+    map.addControl(new BMap.NavigationControl());
+    map.addControl(new BMap.ScaleControl());
+    map.addControl(new BMap.OverviewMapControl());
+    map.setCurrentCity("东兴市");          // 设置地图显示的城市 此项是必须设置的
+    map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+
+    // // 创建小车图标
+    // var myIcon = new BMap.Icon("/gif/test.gif", new BMap.Size(52, 26));
+    // // 创建Marker标注，使用小车图标
+    // var pt = new BMap.Point(107.98876,21.557033);
+    // var marker2 = new BMap.Marker(pt, {
+    //     icon: myIcon
+    // });
+    // // 将标注添加到地图
+    // map.addOverlay(marker2);
+    //
+    // var marker1 = new BMap.Marker(new BMap.Point(107.983801,21.540325));
+    // map.addOverlay(marker1);
+    // //创建信息窗口
+    // var opts = {width:200,height:100,title:"<b>测试内容</b>"};
+    // var infoWindow = new BMap.InfoWindow('我是测试内容',opts);
+    // marker1.addEventListener('click',function () {
+    //     map.openInfoWindow(infoWindow,new BMap.Point(107.983801,21.540325));
+    // })
+    //
+    // var markers = [];
+    // markers.push(new BMap.Marker(new BMap.Point(107.979129,21.553572)));
+    // markers.push(new BMap.Marker(new BMap.Point(107.982148,21.550345)));
+    // //最简单的用法，生成一个marker数组，然后调用markerClusterer类即可。
+    // var markerClusterer = new BMapLib.MarkerClusterer(map, {markers:markers});
+
+
+    //单击获取点击的经纬度
+    // map.addEventListener("click",function(e){
+    //     alert(e.point.lng + "," + e.point.lat);
+    // });
+    var opts = {
+        width : 280,
+        height: 280,
+        title : "" ,
+        enableMessage:true,
+    };
+    var keyopts = {
+        width : 280,
+        height: 100,
+        title : "" ,
+        enableMessage:true,
+    };
+
+    function addMarkerInfo(marker,content,opts){
+        var infoWindow = new BMap.InfoWindow(content, opts);
+        marker.onclick=function(){
+            marker.openInfoWindow(infoWindow);
+        }
+    }
+    var markers = [];
+    var keymarkers = [];
+    var monimarkers = [];
+    var markerClusterer;
+    var keymarkerClusterer;
+    var monimarkerClusterer;
+    function showRy() {
+        // map.removeOverlay(marker2);
+        markerClusterer.addMarkers(markers);
+    }
+
+    function hideRy() {
+        // map.addOverlay(marker2);
+        markerClusterer.removeMarkers(markers);
+    }
+    function showKey() {
+        keymarkerClusterer.addMarkers(keymarkers);
+    }
+
+    function hideKey() {
+        keymarkerClusterer.removeMarkers(keymarkers);
+    }
+    function showMoni() {
+        monimarkerClusterer.addMarkers(monimarkers);
+    }
+
+    function hideMoni() {
+        monimarkerClusterer.removeMarkers(monimarkers);
+    }
+    //开始请求数据
+    $(function(){
+
+        $.ajax({
+            url: "/bmap/getView",
+            type: "GET",
+            data: {},
+            success: function (data) {
+                var rylist = data.data.part1;
+                if(rylist.length > 0){
+                    for (let i = 0; i < rylist.length; i++) {
+                        var marker = new BMap.Marker(new BMap.Point(rylist[i].longitude,rylist[i].latitude),{icon : new BMap.Icon("/gif/mapmen1.gif", new BMap.Size(52, 26))});
+                        markers.push(marker);
+                        var label = new BMap.Label("病例：" + rylist[i].name,{offset:new BMap.Size(30,0)});
+                        label.setStyle({
+                            color: "#fff",
+                            backgroundColor: "#00D7E8",
+                            borderRadius: "10px",
+                            padding: "0 10px",
+                            fontSize: "14px",
+                            lineHeight: "20px",
+                            border :"0",
+                            transform:'translate(-70%,140%)'
+                        });
+                        marker.setLabel(label);
+                        var content = "<h4 style='color:#CC5522;font-size:14px;margin:0 0 5px 0;padding:0.2em 0'>" + rylist[i].name + "</h4>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>性别："+rylist[i].gender+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>年龄："+rylist[i].age+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>是否确诊: "+rylist[i].confirmd+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>户籍地: "+rylist[i].domicile+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>现住址: "+rylist[i].address+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>所在社区: "+rylist[i].community+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>网格分布: "+rylist[i].reseau+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>发现方式: "+rylist[i].casesSource+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>职业: "+rylist[i].profession+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>职业（副）: "+rylist[i].profession2+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>诊断时间（报告卡）: "+rylist[i].reportDiagnosticTime+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>关联病历: "+rylist[i].relatedCases+"</p>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>初筛阳采样地点: "+rylist[i].firstPositiveSamplePlace+"</p>"+
+                            "</div>";
+                        addMarkerInfo(marker,content,opts);
+                    }
+                     markerClusterer = new BMapLib.MarkerClusterer(map, {markers:markers});
+                }
+                //重点场所
+                var keylist = data.data.part2;
+                if(keylist.length > 0){
+                    for (let i = 0; i < keylist.length; i++) {
+                        var keymarker = new BMap.Marker(new BMap.Point(keylist[i].longitude,keylist[i].latitude),{icon : new BMap.Icon("/gif/flag1.gif", new BMap.Size(52, 26))});
+                        keymarkers.push(keymarker);
+                        var label = new BMap.Label("重点场所：" + keylist[i].keyPlace,{offset:new BMap.Size(30,0)});
+                        label.setStyle({
+                            color: "#fff",
+                            backgroundColor: "#FF0303",
+                            borderRadius: "10px",
+                            padding: "0 10px",
+                            fontSize: "14px",
+                            lineHeight: "20px",
+                            border :"0",
+                            transform:'translate(-70%,140%)'
+                        });
+                        keymarker.setLabel(label);
+                        var content = "<h4 style='color:#CC5522;font-size:14px;margin:0 0 5px 0;padding:0.2em 0'>" + keylist[i].keyPlace + "</h4>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>备注："+keylist[i].bz+"</p>"+
+                            "</div>";
+                        addMarkerInfo(keymarker,content,keyopts);
+                    }
+                    keymarkerClusterer = new BMapLib.MarkerClusterer(map, {markers:keymarkers});
+                }
+
+                //监测点
+                var monilist = data.data.part3;
+                if(monilist.length > 0){
+                    for (let i = 0; i < monilist.length; i++) {
+                        var monimarker = new BMap.Marker(new BMap.Point(monilist[i].longitude,monilist[i].latitude),{icon : new BMap.Icon("/gif/building.gif", new BMap.Size(52, 26))});
+                        monimarkers.push(monimarker);
+                        var label = new BMap.Label("监测点：" + monilist[i].monitorPlace,{offset:new BMap.Size(30,0)});
+                        label.setStyle({
+                            color: "#fff",
+                            backgroundColor: "#3F2BF2",
+                            borderRadius: "10px",
+                            padding: "0 10px",
+                            fontSize: "14px",
+                            lineHeight: "20px",
+                            border :"0",
+                            transform:'translate(-70%,140%)'
+                        });
+                        monimarker.setLabel(label);
+                        var content = "<h4 style='color:#CC5522;font-size:14px;margin:0 0 5px 0;padding:0.2em 0'>" + monilist[i].monitorPlace + "</h4>"+
+                            "<p style='font:12px arial,sans-serif;margin:0;line-height:1.5;'>备注："+monilist[i].bz+"</p>"+
+                            "</div>";
+                        addMarkerInfo(monimarker,content,keyopts);
+                    }
+                    monimarkerClusterer = new BMapLib.MarkerClusterer(map, {markers:monimarkers});
+                }
+            },//响应成功后的回调函数
+            error: function () {
+                alert("请求后台数据出现问题，请重试！")
+            },
+            dataType: "json"
+        });
+    });
+
+
+</script>
+</body>
+</html>
