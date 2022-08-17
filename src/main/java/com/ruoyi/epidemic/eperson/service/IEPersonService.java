@@ -89,4 +89,12 @@ public interface IEPersonService
     Map<String, Object> getView();
 
     Map<String, Object> getBMapView();
+
+    List<EPerson> selectEPersonListExitRyId(EPerson ePerson);
+
+    void addRelations(String ids,Long eId);
+
+    String selectRelationByeId(Long ryId);
+
+    List<EPerson> getRelationByIds(Long ryId);
 }

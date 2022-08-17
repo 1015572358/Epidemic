@@ -378,4 +378,35 @@
         where confirmd != '0' and longitude is not null and latitude is not null
     </select>
 
+    <select id="selectEPersonListExitRyId" parameterType="com.ruoyi.epidemic.eperson.domain.EPerson"
+            resultMap="EPersonResult">
+        <include refid="selectEPersonVo"/>
+        <where>
+            <if test="eNo != null  and eNo != ''">and e_no like concat('%', #{eNo}, '%')</if>
+            <if test="sfzh != null  and sfzh != ''">and sfzh like concat('%', #{sfzh}, '%')</if>
+            <if test="name != null  and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="gender != null  and gender != ''">and gender = #{gender}</if>
+            <if test="community != null  and community != ''">and community like concat('%', #{community}, '%')</if>
+            <if test="id != null  and id != ''">and id != #{id}</if>
+        </where>
+        order by e_no
+    </select>
+    <select id="selectRelationByeId" resultType="java.lang.String">
+        select relations
+        from e_relation
+        where e_id = #{ryId}
+    </select>
+    <select id="getRelationByIds" resultType="com.ruoyi.epidemic.eperson.domain.EPerson">
+        <include refid="selectEPersonVo"/>
+        WHERE
+        FIND_IN_SET( id, ( SELECT relations FROM e_relation WHERE e_id = #{ryId} ) )
+    </select>
+
+    <insert id="addRelations">
+        insert into e_relation (e_id, relations)
+        values (#{eId}, #{ids}) ON DUPLICATE KEY
+        UPDATE relations =
+        values (relations)
+    </insert>
+
 </mapper>

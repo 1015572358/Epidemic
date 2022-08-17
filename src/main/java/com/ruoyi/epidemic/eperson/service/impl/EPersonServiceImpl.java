@@ -279,4 +279,24 @@ public class EPersonServiceImpl implements IEPersonService
         result.put("part3",part3);
         return result;
     }
+
+    @Override
+    public List<EPerson> selectEPersonListExitRyId(EPerson ePerson) {
+        return ePersonMapper.selectEPersonListExitRyId(ePerson);
+    }
+
+    @Override
+    public void addRelations(String ids,Long eId) {
+        ePersonMapper.addRelations(ids,eId);
+    }
+
+    @Override
+    public String selectRelationByeId(Long ryId) {
+        return this.ePersonMapper.selectRelationByeId(ryId);
+    }
+
+    @Override
+    public List<EPerson> getRelationByIds(Long ryId) {
+        return ePersonMapper.getRelationByIds(ryId);
+    }
 }

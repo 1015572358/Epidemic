@@ -98,5 +98,13 @@ public interface EPersonMapper
     List<Map<String, Object>> getViewPart5();
 
     List<EPerson> getBMapViewJWD();
+
+    List<EPerson> selectEPersonListExitRyId(EPerson person);
+
+    void addRelations(@Param("ids") String ids,@Param("eId") Long eId);
+
+    String selectRelationByeId(Long ryId);
+
+    List<EPerson> getRelationByIds(Long ryId);
 }
 

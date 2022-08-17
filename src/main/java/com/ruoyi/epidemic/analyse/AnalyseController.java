@@ -24,7 +24,7 @@ public class AnalyseController {
     @RequiresPermissions("analyse:analyse:view")
     @GetMapping()
     public String analyseView() {
-        return "/epidemic/analyse/analyse";
+        return "epidemic/analyse/analyse";
     }
 
 

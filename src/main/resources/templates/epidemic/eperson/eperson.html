@@ -4,88 +4,92 @@
     <th:block th:include="include :: header('阳性人员列表')" />
 </head>
 <body class="gray-bg">
-     <div class="container-div">
-        <div class="row">
-            <div class="col-sm-12 search-collapse">
-                <form id="formId">
-                    <div class="select-list">
-                        <ul>
-                            <li>
-                                <label>疫情编号：</label>
-                                <input type="text" name="eNo"/>
-                            </li>
-                            <li>
-                                <label>姓名：</label>
-                                <input type="text" name="name"/>
-                            </li>
-                            <li>
-                                <label>性别：</label>
-                                <select name="gender" th:with="type=${@dict.getType('sys_user_sex')}">
-                                    <option value="">所有</option>
-                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
-                                </select>
-                            </li>
-                            <li>
-                                <label>身份证号：</label>
-                                <input type="text" name="sfzh"/>
-                            </li>
-                            <li>
-                                <label>所在社区：</label>
-                                <input type="text" name="community"/>
-                            </li>
-                            <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
-                            </li>
-                        </ul>
-                    </div>
-                </form>
-            </div>
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>疫情编号：</label>
+                            <input type="text" name="eNo"/>
+                        </li>
+                        <li>
+                            <label>姓名：</label>
+                            <input type="text" name="name"/>
+                        </li>
+                        <li>
+                            <label>性别：</label>
+                            <select name="gender" th:with="type=${@dict.getType('sys_user_sex')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>身份证号：</label>
+                            <input type="text" name="sfzh"/>
+                        </li>
+                        <li>
+                            <label>所在社区：</label>
+                            <input type="text" name="community"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
 
-            <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="epidemic:eperson:add">
-                    <i class="fa fa-plus"></i> 添加
-                </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="epidemic:eperson:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="epidemic:eperson:remove">
-                    <i class="fa fa-remove"></i> 删除
-                </a>
-                <a class="btn btn-info" onclick="$.table.importExcel()" shiro:hasPermission="epidemic:eperson:import">
-                    <i class="fa fa-upload"></i> 导入
-                </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="epidemic:eperson:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
-            </div>
-            <div class="col-sm-12 select-table table-striped">
-                <table id="bootstrap-table"></table>
-            </div>
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="epidemic:eperson:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="epidemic:eperson:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="epidemic:eperson:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+            <a class="btn btn-info" onclick="$.table.importExcel()" shiro:hasPermission="epidemic:eperson:import">
+                <i class="fa fa-upload"></i> 导入
+            </a>
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="epidemic:eperson:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
         </div>
     </div>
-    <th:block th:include="include :: footer" />
-    <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('epidemic:eperson:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('epidemic:eperson:remove')}]];
-        var genderDatas = [[${@dict.getType('sys_user_sex')}]];
-        var confirmdDatas = [[${@dict.getType('e_confirm')}]];
-        var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
-        var prefix = ctx + "epidemic/eperson";
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('epidemic:eperson:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('epidemic:eperson:remove')}]];
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var confirmdDatas = [[${@dict.getType('e_confirm')}]];
+    var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
+    var prefix = ctx + "epidemic/eperson";
 
-        $(function() {
-            var options = {
-                url: prefix + "/list",
-                createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
-                removeUrl: prefix + "/remove",
-                exportUrl: prefix + "/export",
-                importUrl: prefix + "/importData",
-                importTemplateUrl: prefix + "/importTemplate",
-                modalName: "阳性人员",
-                columns: [{
-                    checkbox: true
-                },
+    $(function() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            importUrl: prefix + "/importData",
+            importTemplateUrl: prefix + "/importTemplate",
+            modalName: "阳性人员",
+            detailView: true,
+            onExpandRow : function(index, row, $detail) {
+                initChildTable(index, row, $detail);
+            },
+            columns: [{
+                checkbox: true
+            },
                 {
                     field: 'id',
                     title: '主键',
@@ -107,7 +111,7 @@
                     field: 'gender',
                     title: '性别',
                     formatter: function(value, row, index) {
-                       return $.table.selectDictLabel(genderDatas, value);
+                        return $.table.selectDictLabel(genderDatas, value);
                     }
                 },
                 {
@@ -122,7 +126,7 @@
                     field: 'confirmd',
                     title: '是否确诊',
                     formatter: function(value, row, index) {
-                       return $.table.selectDictLabel(confirmdDatas, value);
+                        return $.table.selectDictLabel(confirmdDatas, value);
                     }
                 },
                 {
@@ -140,18 +144,91 @@
                         var actions = [];
                         actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
                         actions.push('<a class="btn btn-primary btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="addGJ(\'' + row.id + '\')"><i class="fa fa-edit"></i>轨迹</a> ');
+                        actions.push('<a class="btn btn-info btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="addRelation(\'' + row.id + '\')"><i class="fa fa-edit"></i>关联</a> ');
                         actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
                         return actions.join('');
                     }
                 }]
-            };
-            $.table.init(options);
+        };
+        $.table.init(options);
+    });
+    initChildTable = function(index, row, $detail) {
+        var childTable = $detail.html('<table style="table-layout:fixed"></table>').find('table');
+        $(childTable).bootstrapTable({
+            url: prefix + "/getRelationByIds/"+row.id,
+            method: 'get',
+            sidePagination: "server",
+            contentType: "application/x-www-form-urlencoded",
+            columns: [
+                [{
+                    title: '关联病例',
+                    colspan: 7,
+                    align:'center',
+                }],[
+                    {
+                        field: 'name',
+                        title: '姓名',
+                        css:{ color: 'red' }
+                    },
+                    {
+                        field: 'gender',
+                        title: '性别',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(genderDatas, value);
+                        }
+                    },
+                    {
+                        field: 'age',
+                        title: '年龄'
+                    },
+                    {
+                        field: 'sfzh',
+                        title: '身份证号'
+                    },
+                    {
+                        field: 'confirmd',
+                        title: '是否确诊',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(confirmdDatas, value);
+                        }
+                    },
+                    {
+                        field: 'community',
+                        title: '所在社区'
+                    },
+                    {
+                        field: 'reseau',
+                        title: '网格'
+                    }]]
         });
-    </script>
+    };
+</script>
 <script>
     // 添加信息
     function addGJ(id){
         $.modal.open('添加用户', "epidemic/etrack/addGJs/"+id, '1000', '600');
+    }
+    //关联信息
+    function addRelation(id){
+        var options = {
+            title: '选择关联病历',
+            url: prefix + "/showRelation/"+id,
+            callBack: doSubmit2
+        };
+        $.modal.openOptions(options);
+    }
+    function doSubmit2(index, layero){
+        var rows = layero.find("iframe")[0].contentWindow.getSelections();
+        var ids = rows.split(";")[0];
+        var eid = rows.split(";")[1];
+        console.log(ids,eid)
+        $.post(prefix + '/addRelation',{ids:ids,eId:eid},function (data) {
+            if(data.code == 0) {
+                $.modal.msgSuccess('绑定成功！')
+            } else {
+                $.modal.msgError('绑定失败！')
+            }
+        });
     }
 </script>
 </body>
