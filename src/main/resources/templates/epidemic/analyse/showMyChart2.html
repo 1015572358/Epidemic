@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>数据分析下钻</title>
+    <script type="text/javascript" th:src="@{/BMap/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/echarts.min.js}"></script>
+    <th:block th:include="include :: header('数据分析下钻')" />
+    <style>
+        .echarts{
+            height: 400px;
+        }
+        .echarts-table{
+            height: 450px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>职业TOP 10</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>病例类型</h5>
+                </div>
+                <div class="ibox-content">
+
+                    <div class="echarts" id="echarts2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>数据列表</h5>
+                </div>
+                <div class="ibox-content select-table table-striped">
+                    <div class="echarts-table">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            param:'',
+            option1: {
+                //图标位置
+                grid: {
+                    // top: '20%',
+                    left: '25%'
+                },
+                xAxis: {
+                    show: false
+                },
+                yAxis: [{
+                    show: true,
+                    data: [],
+                    inverse: true,
+                    axisLine: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        color: '#333',
+                        formatter: (value, index) => {
+                            return [
+                                `{lg|${index+1}}  ` + '{title|' + value + '} '
+                            ].join('\n')
+                        },
+                        rich: {
+                            lg: {
+                                backgroundColor: '#8d7fec',
+                                color: '#fff',
+                                borderRadius: 15,
+                                padding: 2,
+                                align: 'center',
+                                width: 15,
+                                height: 15
+                            },
+                            title:{
+                                backgroundColor: '#8d7fec',
+                                color: '#fff',
+                                width:150,
+                                align:'left',
+                                borderRadius: 5,
+                                padding: 5,
+                            }
+                        }
+                    },
+                }],
+                series: [{
+                    name: '条',
+                    type: 'bar',
+                    yAxisIndex: 0,
+                    data: [],
+                    barWidth: 10,
+                    label: {
+                        normal: {
+                            show: true,
+                            position: 'right',
+                            textStyle: {
+                                color: '#333',
+                                fontSize: '16',
+                            }
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 20,
+                            color: function(params) {
+                                var myColor = ['#1089E7', '#F57474', '#56D0E3', '#1089E7', '#F57474', '#56D0E3', '#F8B448', '#8B78F6', '#F8B448', '#8B78F6'];
+                                var num = myColor.length;
+                                return myColor[params.dataIndex % num]
+                            },
+                            // 渐变色
+                            // color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                            // offset: 0,
+                            // color: 'rgba(0,255,0)'
+                            // }, {
+                            // offset: 1,
+                            // color: 'rgb(215 ,255,0)'
+                            // }]),
+                        }
+                    },
+
+                },
+                ]
+            },
+            option2:{
+                baseOption: {
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    timeline: {
+                        show: false,
+                        top: 0,
+                        data: []
+                    },
+                    grid: [{
+                        show: false,
+                        left: '5%',
+                        top: '20',
+                        bottom: '20%',
+                        containLabel: true,
+                        width: '37%'
+                    },
+                        {
+                            show: false,
+                            left: '52%',
+                            top: '20',
+                            bottom: '20%',
+                            width: '0%'
+                        },
+                        {
+                            show: false,
+                            right: '5%',
+                            top: '20',
+                            bottom: '20%',
+                            containLabel: true,
+                            width: '37%'
+                        }
+                    ],
+                    xAxis: [{
+                        type: 'value',
+                        inverse: true,
+                        axisLine: {
+                            show: false
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        position: 'top',
+                        axisLabel: {
+                            show: false
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    },
+                        {
+                            gridIndex: 1,
+                            show: false
+                        },
+                        {
+                            gridIndex: 2,
+                            axisLine: {
+                                show: false
+                            },
+                            axisTick: {
+                                show: false
+                            },
+                            position: 'top',
+                            axisLabel: {
+                                show: false
+                            },
+                            splitLine: {
+                                show: false
+                            }
+                        }
+                    ],
+                    yAxis: [{
+                        type: 'category',
+                        inverse: true,
+                        position: 'right',
+                        axisLine: {
+                            show: false
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        axisLabel: {
+                            show: false
+                        },
+                        data: []
+                    },
+                        {
+                            gridIndex: 1,
+                            type: 'category',
+                            inverse: true,
+                            position: 'left',
+                            axisLine: {
+                                show: false
+                            },
+                            axisTick: {
+                                show: false
+                            },
+                            axisLabel: {
+                                show: true,
+                                textStyle: {
+                                    color: '#333',
+                                    fontSize: 14
+                                }
+                            },
+                            data: []
+                        },
+                        {
+                            gridIndex: 2,
+                            type: 'category',
+                            inverse: true,
+                            position: 'left',
+                            axisLine: {
+                                show: false
+                            },
+                            axisTick: {
+                                show: false
+                            },
+                            axisLabel: {
+                                show: false
+                            },
+                            data: []
+                        }
+                    ],
+                    series: []
+                },
+                options: [{
+                    series: [{
+                        type: 'bar',
+                        xAxisIndex: 0,
+                        yAxisIndex: 0,
+                        itemStyle: {
+                            normal: {
+                                show: false,
+                                color: 'rgba(65, 217, 199, 0.1)',
+                                borderWidth: 0
+                            },
+                            emphasis: {
+                                color: 'rgba(65, 217, 199, 0.1)'
+                            }
+                        },
+                        barGap: '-100%',
+                        barWidth: '50%',
+                        data: []
+                    },
+                        {
+                            name: '男',
+                            type: 'bar',
+                            xAxisIndex: 0,
+                            yAxisIndex: 0,
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: function(params) {
+                                        var colorList = [
+                                            '#2f54eb',
+                                            '#feb513',
+                                            '#30ca40',
+                                            '#a147eb',
+                                            '#fcec13',
+                                            '#8b572a',
+                                            '#e0109c',
+                                            '#fc605f',
+                                            '#50e3c2',
+                                            '#6879ff',
+                                        ];
+                                        return colorList[params.dataIndex]
+                                    },
+                                    borderWidth: 0,
+                                    borderColor: '#f8d517'
+                                }
+                            },
+                            label: {
+                                normal: {
+                                    show: true,
+                                    formatter: (series) => {
+                                        // return mData[series.dataIndex].value + '%'
+                                        return '0%'
+                                    },
+                                    position: 'left',
+                                    textStyle: {
+                                        color: '#223273',
+                                        fontSize: 11
+                                    }
+                                }
+                            },
+                            barWidth: '50%',
+                            data: [],
+                            markPoint: {
+                                symbol: 'image://data:image/svg+xml;base64,PHN2ZyBpZD0i57uEXzI5MDgiIGRhdGEtbmFtZT0i57uEIDI5MDgiIHhtbG5zPSJodHR' +
+                                    'wOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9' +
+                                    'IjAgMCAzNi45OTkgNzEuNDgiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6IHVybCgjb' +
+                                    'GluZWFyLWdyYWRpZW50KTsKICAgICAgfQogICAgPC9zdHlsZT4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW' +
+                                    '50IiB4MT0iMC41IiB5MT0iLTAuMzU2IiB4Mj0iMC41IiB5Mj0iMSIgZ3JhZGllbnRVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giPgo' +
+                                    'gICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxYmM4ZmMiIHN0b3Atb3BhY2l0eT0iMC43OCIvPgogICAgICA8c3Rv' +
+                                    'cCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMTg0YjkiIHN0b3Atb3BhY2l0eT0iMC42OTQiLz4KICAgIDwvbGluZWFyR3JhZGllb' +
+                                    'nQ+CiAgPC9kZWZzPgogIDxwYXRoIGlkPSLot6/lvoRfMjM1IiBkYXRhLW5hbWU9Iui3r+W+hCAyMzUiIGNsYXNzPSJjbHMtMSIgZD' +
+                                    '0iTTEyLjg5MSwxNDguMzc5QTE4Ljg3NiwxOC44NzYsMCwwLDAsMCwxNjYuNDg2djEyLjkyMWExLjE2NywxLjE2NywwLDAsMCwxLjE' +
+                                    '1NiwxLjE1Nkg3LjM5NHYxNS42YS45NzQuOTc0LDAsMCwwLC45NzguOTYzSDI4LjYyN2EuOTc0Ljk3NCwwLDAsMCwuOTc4LS45NjN2' +
+                                    'LTE1LjZoNC44MTZBMi41OCwyLjU4LDAsMCwwLDM3LDE3Ny45ODRWMTY1LjMzYzAtMTEuNjQ3LTEyLjEyMS0yMC43NDUtMjQuMTA4L' +
+                                    'TE2Ljk1MVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgLTEyNS42NDkpIi8+CiAgPHBhdGggaWQ9Iui3r+W+hF8yMzYiIGRhdGEtbm' +
+                                    'FtZT0i6Lev5b6EIDIzNiIgY2xhc3M9ImNscy0xIiBkPSJNNzMuOCwxMC43QTEwLjc1LDEwLjc1LDAsMSwwLDYzLjA1OCwyMS40LDE' +
+                                    'wLjc0NCwxMC43NDQsMCwwLDAsNzMuOCwxMC43Wm0wLDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC00NC41NSkiLz4KPC9zdmc+Cg==',
+                                symbolSize: [25, 50],
+                                label: {
+                                    position: 'right',
+                                    padding: [0, 0, 0, 10],
+                                    fontSize: 12,
+                                    color: '#333333',
+                                    formatter: '男'
+                                },
+                                // markPoint 图片的位置
+                                data: [{
+                                    name: '某个屏幕坐标',
+                                    x: '30%',
+                                    y: '85%'
+                                }],
+                                silent: true
+                            }
+                        },
+                        {
+                            type: 'bar',
+                            xAxisIndex: 2,
+                            yAxisIndex: 2,
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: 'rgba(65, 217, 199, 0.1)',
+                                    borderWidth: 0
+                                },
+                                emphasis: {
+                                    color: 'rgba(65, 217, 199, 0.1)'
+                                }
+                            },
+                            barGap: '-100%',
+                            barWidth: '50%',
+                            data: []
+                        },
+                        {
+                            name: '女',
+                            type: 'bar',
+                            xAxisIndex: 2,
+                            yAxisIndex: 2,
+                            itemStyle: {
+                                normal: {
+                                    show: true,
+                                    color: function(params) {
+                                        var colorList = [
+                                            '#2f54eb',
+                                            '#feb513',
+                                            '#30ca40',
+                                            '#a147eb',
+                                            '#fcec13',
+                                            '#8b572a',
+                                            '#e0109c',
+                                            '#fc605f',
+                                            '#50e3c2',
+                                            '#6879ff',
+                                        ];
+                                        return colorList[params.dataIndex]
+                                    },
+                                    borderWidth: 0,
+                                    borderColor: '#f39c11'
+                                }
+                            },
+                            label: {
+                                normal: {
+                                    show: true,
+                                    formatter: (series) => {
+                                        // return fData[series.dataIndex].value + '%'
+                                        return '0%'
+                                    },
+                                    position: 'right',
+                                    textStyle: {
+                                        color: '#223273',
+                                        fontSize: 11
+                                    }
+                                }
+                            },
+                            barWidth: '50%',
+                            data: [],
+                            markPoint: {
+                                symbol: 'image://data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5' +
+                                    'rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMzcuOTYgNjkuNSI+CiAgPGRlZnM+CiAgICA8c3R5' +
+                                    'bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogdXJsKCNsaW5lYXItZ3JhZGllbnQpOwogICAgICB9CiAgICA8L3N0eWxlP' +
+                                    'gogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIwLjUiIHgyPSIwLjUiIHkyPSIxIiBncmFkaWVudF' +
+                                    'VuaXRzPSJvYmplY3RCb3VuZGluZ0JveCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzAzZWJiNyIvPgogICA' +
+                                    'gICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMGEzN2YiIHN0b3Atb3BhY2l0eT0iMC42OTQiLz4KICAgIDwvbGluZWFy' +
+                                    'R3JhZGllbnQ+CiAgPC9kZWZzPgogIDxnIGlkPSLnu4RfMjkwOSIgZGF0YS1uYW1lPSLnu4QgMjkwOSIgdHJhbnNmb3JtPSJ0cmFuc' +
+                                    '2xhdGUoMC4wNjIpIj4KICAgIDxwYXRoIGlkPSLot6/lvoRfMjM3IiBkYXRhLW5hbWU9Iui3r+W+hCAyMzciIGNsYXNzPSJjbHMtMS' +
+                                    'IgZD0iTTc5LjQzNiwxMC40NjdBMTAuNTE4LDEwLjUxOCwwLDEsMCw2OC45MjUsMjAuOTM0LDEwLjUxMiwxMC41MTIsMCwwLDAsNzk' +
+                                    'uNDM2LDEwLjQ2N1ptMCwwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtNDkuOTg2KSIvPgogICAgPHBhdGggaWQ9Iui3r+W+hF8yMzgi' +
+                                    'IGRhdGEtbmFtZT0i6Lev5b6EIDIzOCIgY2xhc3M9ImNscy0xIiBkPSJNMzcuNzg1LDE3Ni4wODNsLTUuNzU1LTIyLjVhMTMuNDE5L' +
+                                    'DEzLjQxOSwwLDAsMC0yNi4xODItLjIxN2wtNS44LDIyLjdhMy44MjUsMy44MjUsMCwwLDAsLjY2NywzLjIxOCwzLjc1OCwzLjc1OC' +
+                                    'wwLDAsMCwyLjkyOCwxLjQ3OXMyLjgyNy4wNTgsNS4wNi4wNzJjLjcyNSwyLjE0NiwxLjc4Myw1LjI5MiwyLjc1NCw4LjM1QTMuNzI' +
+                                    'xLDMuNzIxLDAsMCwwLDE1LDE5MS43NjloNy44NThhMy42NzcsMy42NzcsMCwwLDAsMy41MDgtMi41NTJjLjk3MS0zLjA1OSwyLjA1' +
+                                    'OS02LjMwNiwyLjc2OS04LjQ1MiwyLjIzMy0uMDE1LDUuMDYtLjAyOSw1LjA2LS4wMjlhMy43NjYsMy43NjYsMCwwLDAsMi45MjgtM' +
+                                    'S40NjQsMy42ODUsMy42ODUsMCwwLDAsLjY2Ny0zLjE4OVptMCwwIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0xMjIuMjY5KSIvPg' +
+                                    'ogIDwvZz4KPC9zdmc+Cg==',
+                                symbolSize: [25, 50],
+                                label: {
+                                    position: 'right',
+                                    padding: [0, 0, 0, 10],
+                                    fontSize: 12,
+                                    color: '#333333',
+                                    formatter: '女'
+                                },
+                                // markPoint 图片的位置
+                                data: [{
+                                    name: '某个屏幕坐标',
+                                    x: '70%',
+                                    y: '85%'
+                                }],
+                                silent: true
+                            }
+                        }
+                    ]
+                }]
+            },
+        },
+        created:function (){
+            let chartParam = '[[${chartParam}]]'
+            this.param = chartParam
+            this.queryView();
+        },
+
+        methods:{
+            queryView(){
+                let _this = this;
+                $.get("/analyse/secondView_chart2/"+_this.param, {}, function (data) {
+                    if(data.code == 0){
+                        data.data.part1.forEach(function (item) {
+                            _this.option1.series[0].data.push(item.snum);
+                            _this.option1.yAxis[0].data.push(item.profession);
+                        });
+
+                        var riskList = [];
+                            data.data.part2.forEach(function (item) {
+                                if(item.confirmd == "1"){
+                                    riskList.push({level:"确诊病例",gender:"女",value:item.fmale})
+                                    riskList.push({level:"确诊病例",gender:"男",value:item.male})
+                                } else {
+                                    riskList.push({level:"阳性监测",gender:"女",value:item.fmale})
+                                    riskList.push({level:"阳性监测",gender:"男",value:item.male})
+                                }
+                        });
+
+                        //chart2
+                        var sum = function(arr) {
+                            return arr.reduce(function(prev, curr, idx, arr) {
+                                return prev + curr
+                            })
+                        }
+                        var round = function round(value, decimals) {
+                            return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals)
+                        }
+                        var ratio = function(arr, sum) {
+                            return arr.map(function(item) {
+                                return (round(item / sum, 3) * 100).toFixed(1)
+                            })
+                        }
+
+                        // var count = 0
+                        var man = riskList.filter(x => {
+                            return x.gender === '男'
+                        })
+                        var woman = riskList.filter(x => {
+                            return x.gender === '女'
+                        })
+                        var womanlist = []
+                        var manlist = []
+                        // 根据 排序数组
+                        var orderRiskList = ['确诊病例', '阳性监测']
+                        orderRiskList.forEach(x => {
+                            var m = 0
+                            man.forEach(item => {
+                                if (item.level === x) {
+                                    m = item.value
+                                }
+                            })
+                            manlist.push(m)
+                            var f = 0
+                            woman.forEach(item => {
+                                if (item.level === x) {
+                                    f = item.value
+                                }
+                            })
+                            womanlist.push(f)
+                        })
+                        // 更改数据，以便tooltip显示
+                        var mRatio = ratio(manlist, sum(manlist))
+                        var fRatio = ratio(womanlist, sum(womanlist))
+                        var mData = []
+                        var fData = []
+                        var blankData = []
+                        for (var i = 0; i < orderRiskList.length; i++) {
+                            mData.push({
+                                name: orderRiskList[i],
+                                value: isNaN(Number(mRatio[i])) ? '' : mRatio[i],
+                                // value: 0,
+                                value2: manlist[i],
+                                tooltip: {
+                                    formatter: function(params) {
+                                        var s = ''
+                                        s += '等级：' + params.data.name + '</br>'
+                                        s += '人数: ' + Number(params.data.value2).toLocaleString() + '</br>'
+                                        s += '占比: ' + params.data.value + '%'
+                                        return s
+                                    }
+                                }
+                            })
+                            fData.push({
+                                name: orderRiskList[i],
+                                value: isNaN(Number(fRatio[i])) ? '' : fRatio[i],
+                                value2: womanlist[i],
+                                tooltip: {
+                                    formatter: function(params) {
+                                        var s = ''
+                                        s += '等级：' + params.data.name + '</br>'
+                                        s += '人数: ' + Number(params.data.value2).toLocaleString() + '</br>'
+                                        s += '占比: ' + params.data.value + '%'
+                                        return s
+                                    }
+                                }
+                            })
+                            blankData.push({
+                                value: 100,
+                                tooltip: {
+                                    formatter: function(params) {
+                                        return ''
+                                    }
+                                }
+                            })
+                        }
+                        _this.option2.options[0].series[0].data = blankData;
+                        _this.option2.options[0].series[2].data = blankData;
+                        _this.option2.options[0].series[3].data = fData;
+                        _this.option2.options[0].series[3].label.normal.formatter = (series) => {
+                            return fData[series.dataIndex].value + '%'
+                        };
+                        _this.option2.options[0].series[1].data = mData;
+                        _this.option2.options[0].series[1].label.normal.formatter = (series) => {
+                            return mData[series.dataIndex].value + '%'
+                        };
+                        _this.option2.baseOption.yAxis[0].data = orderRiskList;
+                        _this.option2.baseOption.yAxis[1].data = orderRiskList.map(function(value) {
+                            return {
+                                value: value,
+                                textStyle: {
+                                    align: 'center'
+                                }
+                            }
+                        });
+                        _this.option2.baseOption.yAxis[2].data = orderRiskList;
+
+                        var myChart1 = echarts.init(document.getElementById('echarts1'));
+                        var myChart2 = echarts.init(document.getElementById('echarts2'));
+                        //自适应
+                        window.addEventListener('resize', function() {
+                            myChart1.resize();
+                            myChart2.resize();
+                        });
+
+
+                        myChart1.setOption(_this.option1);
+                        myChart2.setOption(_this.option2);
+                    } else {
+                        //todo 提示错误信息
+                        $.modal.alertError('数据查询失败！')
+                    }
+                });
+            },
+        }
+
+    });
+</script>
+<script th:inline="javascript">
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var confirmdDatas = [[${@dict.getType('e_confirm')}]];
+    var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
+    var professionDatas = [[${@dict.getType('e_profession')}]];
+    var prefix = ctx + "report";
+
+    $(function() {
+        var options = {
+            url: "/epidemic/eperson/list",
+            modalName: "阳性人员",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            queryParams: queryParams,
+            columns: [
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'gender',
+                    title: '性别',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(genderDatas, value);
+                    }
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'sfzh',
+                    title: '身份证号'
+                },
+                {
+                    field: 'confirmd',
+                    title: '病例类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(confirmdDatas, value);
+                    }
+                },
+                {
+                    field: 'community',
+                    title: '所在社区'
+                },
+                {
+                    field: 'reseau',
+                    title: '网格'
+                },
+                {
+                    field: 'profession',
+                    title: '职业',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(professionDatas, value);
+                    }
+                },
+                {
+                    field: 'profession2',
+                    title: '职业（副）'
+                },
+            ]
+        };
+        $.table.init(options);
+    });
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        search.casesSource = [[${chartParam}]];
+        return search;
+    }
+</script>
+</body>
+</html>

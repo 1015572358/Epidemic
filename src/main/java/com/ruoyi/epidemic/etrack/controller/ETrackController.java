@@ -21,6 +21,7 @@ import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.web.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -153,5 +154,46 @@ public class ETrackController extends BaseController {
         eTrack.seteId(eid);
         List<ETrack> eTracks = eTrackService.selectETrackList(eTrack);
         return AjaxResult.success(eTracks);
+    }
+
+    /**
+     * 轨迹删除
+     * @param ids
+     * @return
+     */
+    @GetMapping("/delTrackByIds/{ids}")
+    @ResponseBody
+    public AjaxResult delTrackByIds(@PathVariable("ids") Long[] ids){
+        eTrackService.delTrackByIds(ids);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 导入数据
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @Log(title = "病例轨迹", businessType = BusinessType.IMPORT)
+    @RequiresPermissions("epidemic:etrack:import")
+    @PostMapping("/importData")
+    @ResponseBody
+    public AjaxResult importData(MultipartFile file) throws Exception {
+        ExcelUtil<ETrack> util = new ExcelUtil<ETrack>(ETrack.class);
+        List<ETrack> tracksList = util.importExcel(file.getInputStream());
+        String message = eTrackService.importTracks(tracksList);
+        return AjaxResult.success(message);
+    }
+
+    /**
+     * 下载模板
+     * @return
+     */
+    @RequiresPermissions("epidemic:etrack:view")
+    @GetMapping("/importTemplate")
+    @ResponseBody
+    public AjaxResult importTemplate() {
+        ExcelUtil<ETrack> util = new ExcelUtil<ETrack>(ETrack.class);
+        return util.importTemplateExcel("轨迹数据");
     }
 }

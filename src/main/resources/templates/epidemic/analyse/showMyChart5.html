@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>数据分析下钻</title>
+    <script type="text/javascript" th:src="@{/BMap/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/echarts.min.js}"></script>
+    <th:block th:include="include :: header('数据分析下钻')" />
+    <style>
+        .echarts{
+            height: 400px;
+        }
+        .echarts-table{
+            height: 450px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>网格分布</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>数据列表</h5>
+                </div>
+                <div class="ibox-content select-table table-striped">
+                    <div class="echarts-table">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            param:'',
+            paramGender:'',
+            option1:{
+                tooltip:{
+                    formatter: '{c0}',
+                },
+                dataset: [
+                    {
+                        dimensions: ['profession', 'score'],
+                        source: [],
+                    },
+                    {
+                        transform: {
+                            type: 'sort',
+                            config: { dimension: 'score', order: 'desc' }
+                        }
+                    }
+                ],
+                xAxis: {
+                    type: 'category',
+                    axisLabel: { interval: 0, rotate: 30 }
+                },
+                yAxis: {},
+                series: {
+                    type: 'bar',
+                    encode: { x: 'profession', y: 'score' },
+                    datasetIndex: 1
+                }
+            },
+        },
+        created:function (){
+            let chartParam = '[[${chartParam}]]';
+            let paramGender = '[[${paramGender}]]';
+            this.param = chartParam;
+            this.paramGender = paramGender;
+            this.queryView();
+        },
+
+        methods:{
+            queryView(){
+                let _this = this;
+                $.get("/analyse/secondView_chart5/"+_this.param+"/"+_this.paramGender, {}, function (data) {
+                    if(data.code == 0){
+                        let professionData = [];
+                        data.data.part1.forEach(function (item) {
+                            professionData.push([item.reseau,item.rnum])
+                        });
+                        _this.option1.dataset[0].source = professionData;
+
+                        var myChart1 = echarts.init(document.getElementById('echarts1'));
+                        //自适应
+                        window.addEventListener('resize', function() {
+                            myChart1.resize();
+                        });
+                        myChart1.setOption(_this.option1);
+                    } else {
+                        //todo 提示错误信息
+                        $.modal.alertError('数据查询失败！')
+                    }
+                });
+            },
+        }
+
+    });
+</script>
+<script th:inline="javascript">
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var confirmdDatas = [[${@dict.getType('e_confirm')}]];
+    var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
+    var professionDatas = [[${@dict.getType('e_profession')}]];
+    var prefix = ctx + "report";
+
+    $(function() {
+        var options = {
+            url: "/epidemic/eperson/echartsPerson",
+            modalName: "阳性人员",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            queryParams: queryParams,
+            columns: [
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'gender',
+                    title: '性别',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(genderDatas, value);
+                    }
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'sfzh',
+                    title: '身份证号'
+                },
+                {
+                    field: 'confirmd',
+                    title: '病例类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(confirmdDatas, value);
+                    }
+                },
+                {
+                    field: 'community',
+                    title: '所在社区'
+                },
+                {
+                    field: 'reseau',
+                    title: '网格'
+                },
+                {
+                    field: 'profession',
+                    title: '职业',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(professionDatas, value);
+                    }
+                },
+                {
+                    field: 'profession2',
+                    title: '职业（副）'
+                },
+            ]
+        };
+        $.table.init(options);
+    });
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        search.gender = [[${paramGender}]];
+        search.latitude = [[${chartParam}]];
+        return search;
+    }
+</script>
+</body>
+</html>

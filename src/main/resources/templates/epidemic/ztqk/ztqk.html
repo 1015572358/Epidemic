@@ -56,7 +56,8 @@
                             <div class="ztqk-title-font">新冠疫情动态总体情况</div>
                         </div>
                         <div class="col-sm-4">
-                                <div class="ztqk-title-date"><span>统计时间：</span><span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></div>
+                            <div class="ztqk-title-date"><span>统计时间：</span><span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></div>
+<!--                            <div><input type="button" onclick="exportData();" value="导出报告"></div>-->
                         </div>
                     </div>
                 </div>
@@ -66,18 +67,18 @@
     </div>
     <div class="row">
         <div class="col-sm-3">
-        <div class="ibox float-e-margins">
-            <div class="ibox-title">
-                <span class="label label-success pull-right" style="cursor:pointer;" onclick="showCalendar(this,'1');">Today</span>
-                <h5>今日新增人数</h5>
-            </div>
-            <div class="ibox-content">
-                <h1 class="no-margins"><span th:text="${todaySize}">0</span></h1>
-                <div class="stat-percent font-bold text-success">前一日新增人数：0</div>
-                <small>New apply</small>
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-success pull-right" style="cursor:pointer;" onclick="showCalendar(this,'1');">Today</span>
+                    <h5>今日新增人数</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><span th:text="${todaySize}">0</span></h1>
+                    <div class="stat-percent font-bold text-success">前一日新增人数：0</div>
+                    <small>New apply</small>
+                </div>
             </div>
         </div>
-    </div>
         <div class="col-sm-3">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
@@ -125,6 +126,8 @@
         </div>
     </div>
 </div>
+<!--作为临时使用-->
+<!--<div style="height: 400px;width: 50%" id="report"></div>-->
 <th:block th:include="include :: footer" />
 <th:block th:include="include :: echarts-js" />
 <script type="text/javascript" th:src="@{/js/zlDate.js}"></script>
@@ -235,6 +238,284 @@
             pickerEvent.setPriceArr(eval(data));// 设置数据
             pickerEvent.Init(e);// 开始初始化组件
         });
+    }
+</script>
+<script>
+    // $(function () {
+    //     $.get("/report/getReportData/2022-02-22/2022-02-29",function (data) {
+    //         let mychart = echarts.init(document.getElementById('report'));
+    //         var options = {
+    //             title: {
+    //                 text: '症状特征',
+    //                 left: 'center'
+    //             },
+    //             tooltip: {
+    //                 trigger: 'item',
+    //             },
+    //             legend: {
+    //                 orient: 'vertical',
+    //                 left: 'left'
+    //             },
+    //             series: [
+    //                 {
+    //                     animation:false,
+    //                     name: 'Access From',
+    //                     type: 'pie',
+    //                     radius: '50%',
+    //                     label : {
+    //                         normal : {
+    //                             formatter: '{b}:{c}: ({d}%)',
+    //                         }
+    //                     },
+    //                     data: [
+    //
+    //                     ],
+    //                     emphasis: {
+    //                         itemStyle: {
+    //                             shadowBlur: 10,
+    //                             shadowOffsetX: 0,
+    //                             shadowColor: 'rgba(0, 0, 0, 0.5)'
+    //                         },
+    //                     },
+    //                 }
+    //             ]
+    //         };
+    //         //症状特征
+    //         let graph1Data = [];
+    //         data.data.part1.forEach(function (item) {
+    //             graph1Data.push({name:item.confirmd=="1"?"确诊病例":"阳性监测",value:item.cnum})
+    //         })
+    //         options.series[0].data = graph1Data;
+    //         mychart.setOption(options);
+    //         var img1 = mychart.getDataURL();
+    //
+    //         // 性别比例分布
+    //         let graph2Data = [];
+    //         data.data.part2.forEach(function (item) {
+    //             graph2Data.push({name:item.gender=="0"?"男":"女",value:item.gnum})
+    //         })
+    //         options.title.text = '病例性别分布';
+    //         options.series[0].data = graph2Data;
+    //         mychart.setOption(options);
+    //         var img2 = mychart.getDataURL();
+    //
+    //         //年龄比例分布
+    //         let graph3Data = [];
+    //         data.data.part3.forEach(function (item) {
+    //             graph3Data.push({name:item.nld,value:(item.male+item.fmale)})
+    //         })
+    //         options.title.text = '年龄分布';
+    //         options.series[0].data = graph3Data;
+    //         mychart.setOption(options);
+    //         var img3 = mychart.getDataURL();
+    //         //发现方式比例分布
+    //         let graph5Data = [];
+    //         data.data.part5.forEach(function (item) {
+    //             graph5Data.push({name:item.cases_source,value:item.snum})
+    //         })
+    //         options.title.text = '病例发现方式';
+    //         options.series[0].data = graph5Data;
+    //         mychart.setOption(options);
+    //         var img5 = mychart.getDataURL();
+    //
+    //         //社区分布占比
+    //         let graph8Data = [];
+    //         data.data.part8.forEach(function (item) {
+    //             graph8Data.push({name:item.community,value:item.cnum})
+    //         })
+    //         options.title.text = '社区分布';
+    //         options.series[0].data = graph8Data;
+    //         mychart.setOption(options);
+    //         var img8 = mychart.getDataURL();
+    //
+    //
+    //
+    //         options = {
+    //             title: {
+    //                 text: '职业分布',
+    //                 left: 'center'
+    //             },
+    //             xAxis: {
+    //                 type: 'category',
+    //                 data: [],
+    //                 axisLabel: { //X轴字体倾斜设置
+    //                     interval: 0,
+    //                     rotate: -90 //倾斜的程度
+    //                 }
+    //             },
+    //             yAxis: {
+    //                 type: 'value'
+    //             },
+    //             series: [
+    //                 {
+    //                     data: [],
+    //                     type: 'bar',
+    //                     color:'#5B9BD5',
+    //                     itemStyle: {
+    //                         normal: {
+    //                             label: {
+    //                                 show: true, //开启显示数值
+    //                                 position: 'top', //数值在上方显示
+    //                                 textStyle: {  //数值样式
+    //                                     fontSize: 14  //字体大小
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             ]
+    //         };
+    //
+    //         //职业比例分布
+    //         let graph4Data = [];
+    //         let graph4Data2 = [];
+    //         data.data.part4.forEach(function (item) {
+    //             graph4Data.push(item.profession)
+    //             graph4Data2.push(item.pnum)
+    //         })
+    //         options.series[0].data = graph4Data2;
+    //         options.xAxis.data = graph4Data;
+    //         mychart.setOption(options);
+    //         var img4 = mychart.getDataURL();
+    //
+    //
+    //         //职业比例分布
+    //         let graph6Data = [];
+    //         let graph6Data2 = [];
+    //         data.data.part6.forEach(function (item) {
+    //             graph6Data.push(item.fprt)
+    //             graph6Data2.push(item.fnum)
+    //         })
+    //         options.series[0].data = graph6Data2;
+    //         options.xAxis.data = graph6Data;
+    //         options.title.text = '初筛阳性病例（按日统计）'
+    //
+    //         mychart.setOption(options);
+    //         var img6 = mychart.getDataURL();
+    //
+    //         options = {
+    //             title: {
+    //                 text: '初筛阳性病例（按日统计）'
+    //             },
+    //             tooltip: {
+    //                 trigger: 'axis'
+    //             },
+    //             legend: {
+    //                 data: ['每日新增病例', '累计报告病例']
+    //             },
+    //             grid: {
+    //                 left: '3%',
+    //                 right: '4%',
+    //                 bottom: '3%',
+    //                 containLabel: true
+    //             },
+    //             xAxis: {
+    //                 type: 'category',
+    //                 boundaryGap: false,
+    //                 data: []
+    //             },
+    //             yAxis: {
+    //                 type: 'value'
+    //             },
+    //             series: [
+    //                 {
+    //                     name: '每日新增病例',
+    //                     type: 'line',
+    //                     data: []
+    //                 },
+    //                 {
+    //                     name: '累计报告病例',
+    //                     type: 'line',
+    //                     data: []
+    //                 }
+    //             ]
+    //         };
+    //         //
+    //         // //每日新增病例分析
+    //         let graph7Data = [];
+    //         let graph7Data2 = [];
+    //         let graph7Data3 = [];
+    //         data.data.part7.forEach(function (item) {
+    //             graph7Data.push(item.fprt)
+    //             graph7Data2.push(item.fnum)
+    //             graph7Data3.push(item.allfnum)
+    //         })
+    //         options.series[0].data = graph7Data2;
+    //         options.series[1].data = graph7Data3;
+    //         options.xAxis.data = graph7Data;
+    //         mychart.setOption(options);
+    //         var img7 = mychart.getDataURL();
+    //
+    //         $.post('/report/exportData',{'img1':img1,'img2':img2,'img3':img3,'img4':img4},function (data) {
+    //             console.log('11111')
+    //         })
+    //
+    //     })
+    // });
+
+    function exportData() {
+        let mychart = echarts.init(document.getElementById('report'));
+        mychart.setOption({
+            title: {
+                text: 'Referer of a Website',
+                subtext: 'Fake Data',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left'
+            },
+            series: [
+                {
+                    animation:false,
+                    name: 'Access From',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Search Engine' },
+                        { value: 735, name: 'Direct' },
+                        { value: 580, name: 'Email' },
+                        { value: 484, name: 'Union Ads' },
+                        { value: 300, name: 'Video Ads' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        });
+        $.post('/report/exportData',{'image':mychart.getDataURL()},function (data) {
+            console.log('11111')
+        })
+    }
+
+    function chooseTime(){
+        layer.prompt({
+            title: '请输入生成报告的时间段',
+            content: '<input id="startTime" type="date" class="layui-layer-input">',
+            formType: 3
+        }, function(value, index, elem){
+            var data1=$('#startTime').val()
+            var data2=$('#endTime').val()
+            if(data1===""){
+                layer.tips("请填写时间",$('#startTime'));
+                return;
+            }
+            if(data2===""){
+                layer.tips("请填写时间",$('#endTime'));
+                return;
+            }
+            layer.close(index);
+        });
+
+        $(".layui-layer-content").append("<br/><input id=\"endTime\" type=\"date\" class=\"layui-layer-input\">")
     }
 </script>
 </body>

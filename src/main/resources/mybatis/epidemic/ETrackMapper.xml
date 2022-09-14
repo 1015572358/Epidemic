@@ -12,6 +12,7 @@
         <result property="activePlace" column="active_place"/>
         <result property="longitude" column="longitude"/>
         <result property="latitude" column="latitude"/>
+        <result property="eName" column="eName"/>
     </resultMap>
 
     <resultMap type="com.ruoyi.epidemic.map.BMapTrack" id="BMapTrack">
@@ -26,7 +27,7 @@
 
 
     <sql id="selectETrackVo">
-        select id, e_id, sfzh, active_time, active_place, longitude, latitude
+        select id, e_id,(select name from e_person where id = e_id) 'eName', sfzh, active_time, active_place, longitude, latitude
         from e_track
     </sql>
 
@@ -110,8 +111,15 @@
     </delete>
 
     <delete id="deleteETrackByNotInIdArr">
-        delete from e_track where id not in
+        delete from e_track where e_id = #{ryId} and id not in
         <foreach collection="idArr" item="p" separator="," open="(" close=")">
+            #{p}
+        </foreach>
+
+    </delete>
+    <delete id="delTrackByIds">
+        delete from e_track where id in
+        <foreach collection="ids" item="p" open="(" close=")" separator=",">
             #{p}
         </foreach>
     </delete>

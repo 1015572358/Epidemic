@@ -9,7 +9,7 @@ import com.ruoyi.framework.web.domain.BaseEntity;
 
 /**
  * 轨迹对象 e_track
- * 
+ *
  * @author yuancc
  * @date 2022-08-10
  */
@@ -23,13 +23,16 @@ public class ETrack extends BaseEntity
     /** 人员id */
     private Long eId;
 
+    @Excel(name = "姓名")
+    private String eName;
+
     /** 身份证号 */
     @Excel(name = "身份证号")
     private String sfzh;
 
     /** 活动时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "活动时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "活动时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss",prompt = "请按照正确的时间格式，例：’1994-09-18 12:12:12‘")
     private Date activeTime;
 
     /** 活动地点 */
@@ -37,9 +40,11 @@ public class ETrack extends BaseEntity
     private String activePlace;
 
     /** 经度 */
+    @Excel(name = "经度")
     private String longitude;
 
     /** 纬度 */
+    @Excel(name = "纬度")
     private String latitude;
 
     public void setId(Long id)
@@ -106,16 +111,34 @@ public class ETrack extends BaseEntity
         return latitude;
     }
 
+    public String geteName() {
+        return eName;
+    }
+
+    //导入导出使用
+    public String getEName() {
+        return eName;
+    }
+
+    public void seteName(String eName) {
+        this.eName = eName;
+    }
+
+    public void setEName(String eName) {
+        this.eName = eName;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("eId", geteId())
-            .append("sfzh", getSfzh())
-            .append("activeTime", getActiveTime())
-            .append("activePlace", getActivePlace())
-            .append("longitude", getLongitude())
-            .append("latitude", getLatitude())
-            .toString();
+                .append("id", getId())
+                .append("eId", geteId())
+                .append("eName", geteName())
+                .append("sfzh", getSfzh())
+                .append("activeTime", getActiveTime())
+                .append("activePlace", getActivePlace())
+                .append("longitude", getLongitude())
+                .append("latitude", getLatitude())
+                .toString();
     }
 }

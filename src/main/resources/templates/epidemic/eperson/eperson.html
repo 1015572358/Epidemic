@@ -52,11 +52,14 @@
             <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="epidemic:eperson:remove">
                 <i class="fa fa-remove"></i> 删除
             </a>
-            <a class="btn btn-info" onclick="$.table.importExcel()" shiro:hasPermission="epidemic:eperson:import">
+            <a class="btn btn-info" onclick="$.table.importExcel('importTpl','400','260')" shiro:hasPermission="epidemic:eperson:import">
                 <i class="fa fa-upload"></i> 导入
             </a>
             <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="epidemic:eperson:export">
                 <i class="fa fa-download"></i> 导出
+            </a>
+            <a class="btn btn-primary single disabled" onclick="showReport();" shiro:hasPermission="epidemic:eperson:edit">
+                <i class="fa fa-edit"></i> 调查报告
             </a>
         </div>
         <div class="col-sm-12 select-table table-striped">
@@ -124,7 +127,7 @@
                 },
                 {
                     field: 'confirmd',
-                    title: '是否确诊',
+                    title: '病例类型',
                     formatter: function(value, row, index) {
                         return $.table.selectDictLabel(confirmdDatas, value);
                     }
@@ -187,7 +190,7 @@
                     },
                     {
                         field: 'confirmd',
-                        title: '是否确诊',
+                        title: '病例类型',
                         formatter: function(value, row, index) {
                             return $.table.selectDictLabel(confirmdDatas, value);
                         }
@@ -211,7 +214,7 @@
     //关联信息
     function addRelation(id){
         var options = {
-            title: '选择关联病历',
+            title: '选择关联病例',
             url: prefix + "/showRelation/"+id,
             callBack: doSubmit2
         };
@@ -221,7 +224,6 @@
         var rows = layero.find("iframe")[0].contentWindow.getSelections();
         var ids = rows.split(";")[0];
         var eid = rows.split(";")[1];
-        console.log(ids,eid)
         $.post(prefix + '/addRelation',{ids:ids,eId:eid},function (data) {
             if(data.code == 0) {
                 $.modal.msgSuccess('绑定成功！')
@@ -229,6 +231,18 @@
                 $.modal.msgError('绑定失败！')
             }
         });
+    }
+    function showReport() {
+        //获取人员id
+        var ryId = $("#" + table.options.id).bootstrapTable('getSelections')[0].id;
+        //数据中的id是否存在报告
+        $.get('/report/checkPerson/'+ryId,function (data) {
+            if(data.data > 0){
+                $.modal.open('调查报告', "report/showReport/"+ryId, '1200', '800');
+            } else {
+                $.modal.msgWarning('未找到此人员的报告信息');
+            }
+        })
     }
 </script>
 </body>

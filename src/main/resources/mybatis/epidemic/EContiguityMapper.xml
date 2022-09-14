@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.contiguity.mapper.EContiguityMapper">
+    
+    <resultMap type="com.ruoyi.epidemic.contiguity.domain.EContiguity" id="EContiguityResult">
+        <result property="id"    column="id"    />
+        <result property="eId"    column="e_id"    />
+        <result property="name"    column="name"    />
+        <result property="sfzh"    column="sfzh"    />
+        <result property="gender"    column="gender"    />
+        <result property="age"    column="age"    />
+        <result property="phone"    column="phone"    />
+        <result property="town"    column="town"    />
+        <result property="community"    column="community"    />
+        <result property="apartment"    column="apartment"    />
+        <result property="gridDistribution"    column="grid_distribution"    />
+        <result property="contactSite"    column="contact_site"    />
+        <result property="contactFrequency"    column="contact_frequency"    />
+        <result property="relation"    column="relation"    />
+        <result property="symptom"    column="symptom"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectEContiguityVo">
+        select id, e_id, name, sfzh, gender, age, phone, town, community, apartment, grid_distribution, contact_site, contact_frequency, relation, symptom, remark from e_contiguity
+    </sql>
+
+    <select id="selectEContiguityList" parameterType="com.ruoyi.epidemic.contiguity.domain.EContiguity" resultMap="EContiguityResult">
+        <include refid="selectEContiguityVo"/>
+        <where>
+            <if test="e_name != null  and e_name != ''"> and e_id in (select id from e_person where name like concat('%', #{e_name}, '%'))</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="sfzh != null  and sfzh != ''"> and sfzh = #{sfzh}</if>
+        </where>
+    </select>
+    
+    <select id="selectEContiguityById" parameterType="Long" resultMap="EContiguityResult">
+        <include refid="selectEContiguityVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertEContiguity" parameterType="com.ruoyi.epidemic.contiguity.domain.EContiguity" useGeneratedKeys="true" keyProperty="id">
+        insert into e_contiguity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eId != null">e_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="sfzh != null">sfzh,</if>
+            <if test="gender != null and gender != ''">gender,</if>
+            <if test="age != null">age,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="town != null and town != ''">town,</if>
+            <if test="community != null and community != ''">community,</if>
+            <if test="apartment != null and apartment != ''">apartment,</if>
+            <if test="gridDistribution != null and gridDistribution != ''">grid_distribution,</if>
+            <if test="contactSite != null and contactSite != ''">contact_site,</if>
+            <if test="contactFrequency != null and contactFrequency != ''">contact_frequency,</if>
+            <if test="relation != null and relation != ''">relation,</if>
+            <if test="symptom != null and symptom != ''">symptom,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eId != null">#{eId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="sfzh != null">#{sfzh},</if>
+            <if test="gender != null and gender != ''">#{gender},</if>
+            <if test="age != null">#{age},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="town != null and town != ''">#{town},</if>
+            <if test="community != null and community != ''">#{community},</if>
+            <if test="apartment != null and apartment != ''">#{apartment},</if>
+            <if test="gridDistribution != null and gridDistribution != ''">#{gridDistribution},</if>
+            <if test="contactSite != null and contactSite != ''">#{contactSite},</if>
+            <if test="contactFrequency != null and contactFrequency != ''">#{contactFrequency},</if>
+            <if test="relation != null and relation != ''">#{relation},</if>
+            <if test="symptom != null and symptom != ''">#{symptom},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEContiguity" parameterType="com.ruoyi.epidemic.contiguity.domain.EContiguity">
+        update e_contiguity
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eId != null">e_id = #{eId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="sfzh != null">sfzh = #{sfzh},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="town != null and town != ''">town = #{town},</if>
+            <if test="community != null and community != ''">community = #{community},</if>
+            <if test="apartment != null and apartment != ''">apartment = #{apartment},</if>
+            <if test="gridDistribution != null and gridDistribution != ''">grid_distribution = #{gridDistribution},</if>
+            <if test="contactSite != null and contactSite != ''">contact_site = #{contactSite},</if>
+            <if test="contactFrequency != null and contactFrequency != ''">contact_frequency = #{contactFrequency},</if>
+            <if test="relation != null and relation != ''">relation = #{relation},</if>
+            <if test="symptom != null and symptom != ''">symptom = #{symptom},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEContiguityById" parameterType="Long">
+        delete from e_contiguity where id = #{id}
+    </delete>
+
+    <delete id="deleteEContiguityByIds" parameterType="String">
+        delete from e_contiguity where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

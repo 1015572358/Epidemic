@@ -188,4 +188,17 @@ public class EPersonController extends BaseController {
         List<EPerson> list = this.ePersonService.getRelationByIds(ryId);
         return getDataTable(list);
     }
+
+    /**
+     * echarts数据分析暂时使用经纬度字段存储年龄范围
+     * @param person
+     * @return
+     */
+    @PostMapping("/echartsPerson")
+    @ResponseBody
+    public TableDataInfo echartsPerson(EPerson person) {
+        startPage();
+        List<EPerson> list = ePersonService.selectEPersonList_echarts(person);
+        return getDataTable(list);
+    }
 }

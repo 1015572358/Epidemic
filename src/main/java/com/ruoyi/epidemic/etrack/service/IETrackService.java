@@ -66,4 +66,8 @@ public interface IETrackService
     int insertOrupdatePl(ETrackPlModel eTrackPlModel);
 
     Map<String, Object> getBMapView(String namekey);
+
+    void delTrackByIds(Long[] ids);
+
+    String importTracks(List<ETrack> tracksList);
 }

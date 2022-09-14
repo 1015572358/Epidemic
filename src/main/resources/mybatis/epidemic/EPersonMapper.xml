@@ -83,6 +83,12 @@
             <if test="name != null  and name != ''">and name like concat('%', #{name}, '%')</if>
             <if test="gender != null  and gender != ''">and gender = #{gender}</if>
             <if test="community != null  and community != ''">and community like concat('%', #{community}, '%')</if>
+            <if test="casesSource != null  and casesSource != ''">and cases_source like concat('%', #{casesSource},
+                '%')
+            </if>
+            <if test="reseau != null  and reseau != ''">and reseau like concat('%', #{reseau},
+                '%')
+            </if>
         </where>
         order by e_no
     </select>
@@ -401,6 +407,88 @@
         WHERE
         FIND_IN_SET( id, ( SELECT relations FROM e_relation WHERE e_id = #{ryId} ) )
     </select>
+    <select id="getByName" resultType="long">
+        select id
+        from e_person
+        where name like concat('%', #{e_name}, '%') limit 0
+    </select>
+
+    <select id="getEIdByNameAndSfzh" resultType="java.lang.Long">
+        select id
+        from e_person
+        where name = #{name}
+          and sfzh = #{sfzh}
+    </select>
+    <select id="getTop10ByCommunity" resultType="java.util.Map">
+        select count(*) as snum, cases_source
+        from e_person
+        where community = #{chartParam}
+        group by cases_source
+        order by count(*) desc limit 10
+    </select>
+    <select id="getGenderByConfirmd" resultType="java.util.Map">
+        select confirmd, sum(if(gender = '1', 1, 0)) as 'fmale',sum(if(gender = '0', 1, 0)) as 'male'
+        from e_person
+        where community = #{chartParam}
+        group by confirmd
+    </select>
+    <select id="getProfessionByCommunity" resultType="java.util.Map">
+        SELECT (SELECT dict_label
+                FROM sys_dict_data
+                WHERE dict_type = 'e_profession'
+                  AND dict_value = profession) 'profession', count(*) AS pnum
+        FROM e_person
+        where community = #{chartParam}
+        GROUP BY profession
+    </select>
+    <select id="getReseauByCommunity" resultType="java.util.Map">
+        SELECT reseau,
+               count(1) AS num
+        FROM e_person
+        WHERE community = #{chartParam}
+        GROUP BY reseau
+        ORDER BY reseau
+    </select>
+    <select id="getTop10ByCasesSource" resultType="java.util.Map">
+        select count(*) as snum,
+               (SELECT dict_label
+                FROM sys_dict_data
+                WHERE dict_type = 'e_profession'
+                  AND dict_value = profession) 'profession'
+        from e_person
+        where cases_source = #{chartParam}
+        group by profession
+        order by count(*) desc limit 10
+    </select>
+    <select id="getGenderByCasesSource" resultType="java.util.Map">
+        select confirmd, sum(if(gender = '1', 1, 0)) as 'fmale',sum(if(gender = '0', 1, 0)) as 'male'
+        from e_person
+        where cases_source = #{chartParam}
+        group by confirmd
+    </select>
+    <select id="getTop10ByGender" resultType="java.util.Map">
+        select count(*) as snum,
+               (SELECT dict_label
+                FROM sys_dict_data
+                WHERE dict_type = 'e_profession'
+                  AND dict_value = profession) 'profession'
+        from e_person
+        where gender = #{chartParam}
+        group by profession
+        order by count(*) desc limit 10
+    </select>
+    <select id="getReseauByAge" resultType="java.util.Map">
+        select reseau, count(1) AS rnum
+        from e_person
+        where age between #{ageStart} and #{ageEnd}
+          and gender = #{gender}
+        group by reseau
+    </select>
+    <select id="selectEPersonList_echarts" resultType="com.ruoyi.epidemic.eperson.domain.EPerson">
+        <include refid="selectEPersonVo"/>
+        where gender = #{gender} and age between #{startAge} and #{endAge}
+        order by e_no
+    </select>
 
     <insert id="addRelations">
         insert into e_relation (e_id, relations)
@@ -408,5 +496,141 @@
         UPDATE relations =
         values (relations)
     </insert>
+
+    <select id="getTop10ByCommunity_wg" resultType="java.util.Map">
+        select count(*) as snum, cases_source
+        from e_person
+        where reseau = #{chartParam}
+        group by cases_source
+        order by count(*) desc limit 10
+    </select>
+    <select id="getGenderByConfirmd_wg" resultType="java.util.Map">
+        select confirmd, sum(if(gender = '1', 1, 0)) as 'fmale',sum(if(gender = '0', 1, 0)) as 'male'
+        from e_person
+        where reseau = #{chartParam}
+        group by confirmd
+    </select>
+    <select id="getProfessionByCommunity_wg" resultType="java.util.Map">
+        SELECT (SELECT dict_label
+                FROM sys_dict_data
+                WHERE dict_type = 'e_profession'
+                  AND dict_value = profession) 'profession', count(*) AS pnum
+        FROM e_person
+        where reseau = #{chartParam}
+        GROUP BY profession
+    </select>
+
+    <select id="getReportDataByGraphOne" resultType="java.util.Map">
+        select confirmd, count(*) as cnum
+        from e_person
+        where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        GROUP BY confirmd
+    </select>
+    <select id="getReportDataByGraphTwo" resultType="java.util.Map">
+        select gender, count(*) as gnum
+        from e_person
+        where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        GROUP BY gender;
+    </select>
+    <select id="getReportDataByGraphThree" resultType="java.util.Map">
+        SELECT nld,
+               sum(male)  male,
+               sum(fmale) fmale
+        FROM (
+                 SELECT IF
+                            (
+                                3 >= age AND age >= 0,
+                                '0-3岁',
+                                IF
+                                    (
+                                        age &lt;= 10 AND age >= 4,
+                                        '4-10岁',
+                                        IF
+                                            (
+                                                age &lt;= 20 AND age >= 11,
+                                                '11-20岁',
+                                                IF
+                                                    (
+                                                        age &lt;= 30 AND age >= 21,
+                                                        '21-30岁',
+                                                        IF
+                                                            (
+                                                                age &lt;= 40 AND age >= 31,
+                                                                '31-40岁',
+                                                                IF
+                                                                    (
+                                                                        age &lt;= 50 AND age >= 41,
+                                                                        '41-50岁',
+                                                                        IF
+                                                                            (
+                                                                                age &lt;= 60 AND age >= 51,
+                                                                                '51-60岁',
+                                                                                IF
+                                                                                    (
+                                                                                        age &lt;= 70 AND age >= 61,
+                                                                                        '61-70岁',
+                                                                                        IF
+                                                                                            (age &lt;= 80 AND age >= 71,
+                                                                                             '71-80岁',
+                                                                                             IF(age &lt;= 90 AND age >= 81, '81-90岁', '90岁以上'))
+                                                                                    )
+                                                                            )
+                                                                    )
+                                                            )
+                                                    )
+                                            )
+                                    )
+                            )                       AS nld,
+                        sum(IF(gender = '0', 1, 0)) AS male,
+                        sum(IF(gender = '1', 1, 0)) AS fmale
+                 FROM e_person
+                 WHERE date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+                 GROUP BY age
+                 ORDER BY age
+             ) h
+        GROUP BY h.nld
+    </select>
+    <select id="getReportDataByGraphFour" resultType="java.util.Map">
+        SELECT (SELECT dict_label
+                FROM sys_dict_data
+                WHERE dict_type = 'e_profession'
+                  AND dict_value = profession) 'profession', count(*) AS pnum
+        FROM e_person
+        where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        GROUP BY profession
+    </select>
+    <select id="getReportDataByGraphFive" resultType="java.util.Map">
+        select count(*) as snum, cases_source
+        from e_person
+        where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by cases_source
+    </select>
+    <select id="getReportDataByGraphSix" resultType="java.util.Map">
+        select count(*) 'fnum', date_format(first_positive_report_time, '%Y-%m-%d') 'fprt'
+        from e_person
+         where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime}
+        group by date_format(first_positive_report_time, '%Y-%m-%d') order by date_format(first_positive_report_time, '%Y-%m-%d')
+    </select>
+    <select id="getReportDataByGraphSeven" resultType="java.util.Map">
+        SELECT
+        fnum,
+        fprt,
+        ( SELECT count( 1 ) FROM e_person e WHERE date_format( e.first_positive_report_time, '%Y-%m-%d' ) &lt;= fprt ) 'allfnum'
+        FROM
+        (
+        SELECT
+        count( * ) 'fnum',
+        date_format( t.first_positive_report_time, '%Y-%m-%d' ) 'fprt'
+        FROM
+        e_person t
+        GROUP BY
+        date_format( t.first_positive_report_time, '%Y-%m-%d' )
+        ) t where t.fprt between #{startTime} and #{endTime}
+        ORDER BY
+        t.fprt
+    </select>
+    <select id="getReportDataByGraphEight" resultType="java.util.Map">
+        select community,count(*) 'cnum' from e_person where date_format(report_time, '%Y-%m-%d') BETWEEN #{startTime} and #{endTime} group by community
+    </select>
 
 </mapper>

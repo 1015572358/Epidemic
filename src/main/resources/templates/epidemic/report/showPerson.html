@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('阳性人员列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>姓名：</label>
+                            <input type="text" name="name"/>
+                        </li>
+                        <li>
+                            <label>身份证号：</label>
+                            <input type="text" name="sfzh"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('epidemic:eperson:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('epidemic:eperson:remove')}]];
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var confirmdDatas = [[${@dict.getType('e_confirm')}]];
+    var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
+    var prefix = ctx + "report";
+
+    $(function() {
+        var options = {
+            url: "/epidemic/eperson/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            importUrl: prefix + "/importData",
+            importTemplateUrl: prefix + "/importTemplate",
+            modalName: "阳性人员",
+            clickToSelect: true,
+            columns: [{
+                radio: true,
+            },
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'gender',
+                    title: '性别',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(genderDatas, value);
+                    }
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'sfzh',
+                    title: '身份证号'
+                },
+                {
+                    field: 'confirmd',
+                    title: '病例类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(confirmdDatas, value);
+                    }
+                },
+                {
+                    field: 'community',
+                    title: '所在社区'
+                },
+                {
+                    field: 'reseau',
+                    title: '网格'
+                }
+            ]
+        };
+        $.table.init(options);
+    });
+
+    /* 添加用户-选择用户-提交(子页面调用父页面形式) */
+    function submitHandler(index, layero) {
+        var rows = $.table.selectFirstColumns();
+        if (rows.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        $.modal.close();
+        // 父页面的方法
+        // activeWindow().selectUsers();
+        // 父页面的变量
+        activeWindow().$('#userids').html('我是通过方式一来的：' + rows.join());
+    }
+
+    /* 添加用户-选择用户-提交(回调形式-父页面调用子页面) */
+    function getSelections() {
+        var rows = $.table.selectFirstColumns();
+        if (rows.length == 0) {
+            $.modal.alertWarning("请至少选择一条记录");
+            return;
+        }
+        var rowsData = $("#" + table.options.id).bootstrapTable('getSelections');
+        $.modal.close();
+        return rowsData[0];
+    }
+
+    $("#bootstrap-table").on("check.bs.table check-all.bs.table uncheck.bs.table uncheck-all.bs.table", function (e, rowsAfter, rowsBefore) {
+        var rows = $.common.equals("uncheck-all", e.type) ? rowsBefore : rowsAfter;
+        var rowIds = $.table.affectedRowIds(rows);
+        $("#rowIds").val(rowIds);
+    });
+</script>
+</body>
+</html>

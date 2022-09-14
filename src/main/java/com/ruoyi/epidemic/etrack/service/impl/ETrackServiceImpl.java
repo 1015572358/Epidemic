@@ -1,5 +1,8 @@
 package com.ruoyi.epidemic.etrack.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.epidemic.eperson.mapper.EPersonMapper;
 import com.ruoyi.epidemic.etrack.domain.ETrack;
 import com.ruoyi.epidemic.etrack.domain.ETrackPlModel;
 import com.ruoyi.epidemic.etrack.mapper.ETrackMapper;
@@ -23,6 +26,8 @@ public class ETrackServiceImpl implements IETrackService
 {
     @Autowired
     private ETrackMapper eTrackMapper;
+    @Autowired
+    private EPersonMapper ePersonMapper;
 
     /**
      * 查询轨迹
@@ -100,17 +105,8 @@ public class ETrackServiceImpl implements IETrackService
     public int insertOrupdatePl(ETrackPlModel eTrackPlModel) {
         if(eTrackPlModel != null && eTrackPlModel.getEtrack() != null && eTrackPlModel.getEtrack().size()>0 ){
             //操作删除的数据
-            if(eTrackPlModel.getIdArr().length > 0){
-                //部分删除
-                eTrackMapper.deleteETrackByNotInIdArr(eTrackPlModel.getIdArr());
-            }else{
-                //全部删除
-                eTrackMapper.deleteETrackBysfzh(eTrackPlModel.getSfzh());
-            }
            return eTrackMapper.insertOrupdatePl(eTrackPlModel.getEtrack(),eTrackPlModel.getId(),eTrackPlModel.getSfzh());
         } else {
-            //全部删除
-            eTrackMapper.deleteETrackBysfzh(eTrackPlModel.getSfzh());
             return 1;
         }
     }
@@ -130,5 +126,56 @@ public class ETrackServiceImpl implements IETrackService
         Map<String, Object> result = new HashMap<>();
         result.put("data",list);
         return result;
+    }
+
+    @Override
+    public void delTrackByIds(Long[] ids) {
+        eTrackMapper.delTrackByIds(ids);
+    }
+
+    @Override
+    public String importTracks(List<ETrack> tracksList) {
+        //数据直接追加
+        if (StringUtils.isNull(tracksList) || tracksList.size() == 0)
+        {
+            throw new ServiceException("导入轨迹数据不能为空！");
+        }
+        int successNum = 0;
+        int failureNum = 0;
+        StringBuilder successMsg = new StringBuilder();
+        StringBuilder failureMsg = new StringBuilder();
+        for (ETrack eTrack : tracksList) {
+            try {
+                //身份证和姓名确定唯一数据，否则直接提示异常
+                if(StringUtils.isEmpty(eTrack.geteName()) || StringUtils.isEmpty(eTrack.getSfzh())){
+                    failureNum++;
+                    failureMsg.append("<br/>" + failureNum + "、轨迹数据： '" + eTrack.geteName() + "||" + eTrack.getSfzh() +"' 无法获取姓名或者身份证号码");
+                } else {
+                    //匹配追加入库
+                    Long eid = ePersonMapper.getEIdByNameAndSfzh(eTrack.geteName(), eTrack.getSfzh());
+                    if(eid != null){
+                        eTrack.seteId(eid);
+                        eTrackMapper.insertETrack(eTrack);
+                    } else {
+                        failureNum++;
+                        failureMsg.append("<br/>" + failureNum + "、轨迹数据： '" + eTrack.geteName() + "||" + eTrack.getSfzh() +"'未在病例中找到相关人员数据");
+                    }
+                }
+
+            }catch (Exception e){
+                failureNum++;
+                failureMsg.append("<br/>" + failureNum + "、轨迹数据： '" + eTrack.geteName() + "||" + eTrack.getSfzh() +"'导入异常");
+            }
+        }
+        if (failureNum > 0)
+        {
+            failureMsg.insert(0, "很抱歉，导入失败！共 " + failureNum + " 条数据格式不正确，错误如下：");
+            throw new ServiceException(failureMsg.toString());
+        }
+        else
+        {
+            successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
+        }
+        return successMsg.toString();
     }
 }

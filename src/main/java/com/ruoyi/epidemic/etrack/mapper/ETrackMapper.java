@@ -68,7 +68,10 @@ public interface ETrackMapper
 
     void deleteETrackBysfzh(String sfzh);
 
-    void deleteETrackByNotInIdArr(Long[] idArr);
+    void deleteETrackByNotInIdArr(@Param("idArr") Long[] idArr,@Param("ryId") Long ryId);
 
     List<BMapTrack> getBMapTrack(@Param("name") String namekey);
+
+    void delTrackByIds(Long[] ids);
+
 }

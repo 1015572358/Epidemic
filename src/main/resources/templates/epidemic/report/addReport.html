@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <title>流行病学调查报告</title>
+    <th:block th:include="include :: header('表单向导')" />
+    <th:block th:include="include :: jquery-smartwizard-css" />
+    <style type="text/css">
+        /* 如果要让工具栏固定在页面底部,使用下面的样式,不需要的可以注释 */
+        .sw>.toolbar-bottom{
+            z-index: 100;
+            bottom: 0px;
+            left: 0;
+            width: 100%;
+            position: fixed;
+            text-align: right;
+            background: #fff;
+            box-shadow: 0 -2px 6px 1px hsla(223,8%,83%,.5);
+            border-top: 1px solid #e3e4e8;
+        }
+        /* 如果设置了是否自动调节高度为false,需要加滚动条 */
+        .sw>.tab-content{
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        /* 解决工具栏无法固定底部的问题（如果页面没有animated类可以不写这部分代码） */
+        .animated {
+            animation-fill-mode: none;
+            -webkit-animation-fill-mode: none;
+            -moz-animation-fill-mode: none;
+            -o-animation-fill-mode: none;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" style="height: 100%;">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox">
+                <div class="ibox-title" style="text-align: center">
+                    <h3>
+                        流行病学调查报告
+                    </h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="row select-list" style="padding-left: 15px; margin-bottom: 10px;">
+                        <ul>
+                            <!-- 快速操作栏按钮 -->
+                            <li>
+                                <div class="btn-group-sm" role="group">
+                                    <a class="btn btn-info" id="prev-btn"> 上一步 </a>
+                                    <a class="btn btn-success" id="next-btn"> 下一步 </a>
+                                    <a class="btn btn-danger" id="reset-btn"> 重置 </a>
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div id="smartwizard">
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-1"> 选取病例人员 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-2"> 同住成员 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-3"> 发现及就诊经过 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-4"> 流行病学调查情况 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-5"> 密接者和次密接者调查 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-6"> 实验室检测情况 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-7"> 暴露场所管控 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-8"> 小结 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-9"> 已采取措施 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#step-10"> 下一步工作措施 </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" name="e_id" id="e_id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">姓名：</label>
+                                            <div class="col-sm-8">
+                                                <input id="e_name" name="e_name" class="form-control" type="text" readonly onclick="selectPerson()" style="cursor: pointer" required>
+                                                <span class="help-block m-b-none">
+														<i class="fa fa-info-circle"></i>
+														点击文本框选取人员信息
+													</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">性别：</label>
+                                            <div class="col-sm-8">
+                                                <input id="e_gender" name="e_gender" class="form-control" type="text" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">职业：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="e_profession" name="e_profession" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">职业（副）：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="e_profession2" name="e_profession2" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">身份证号：</label>
+                                            <div class="col-sm-8">
+                                                <input name="e_sfzh" id="e_sfzh" class="form-control" type="text" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">户籍地：</label>
+                                            <div class="col-sm-8">
+                                                <textarea name="e_domicile" id="e_domicile" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">现住址：</label>
+                                            <div class="col-sm-8">
+                                                <textarea name="e_address" id="e_address" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">疫苗接种：</label>
+                                            <div class="col-sm-8">
+                                                <textarea name="e_vaccination" id="e_vaccination" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <h4 class="form-header h4">同住成员</h4>
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <button type="button" class="btn btn-white btn-sm" onclick="addRow()"><i class="fa fa-plus"> 增加</i></button>
+                                                <button type="button" class="btn btn-white btn-sm" onclick="deleteFamily(-2);sub.delRow();"><i class="fa fa-minus"> 删除</i></button>
+                                                <div class="col-sm-12 select-table table-striped">
+                                                    <table id="bootstrap-table"></table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step3Vo_id" name="step3Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">病例来源：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="e_casesSource" name="step3Vo.casesSource" class="form-control" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">发病就诊过程：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step3Vo_diagnosisProcess" name="step3Vo.diagnosisProcess" rows="4" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-4" class="tab-pane" role="tabpanel" aria-labelledby="step-4">
+                                <form class="form form-horizontal m-t">
+                                    <input type="hidden" id="step4Vo_id" name="step4Vo.id">
+                                    <h4 class="form-header h4">接触史调查情况</h4>
+                                    <div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">旅居史：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step4Vo_history" name="step4Vo.history" rows="4" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">接触史：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step4Vo_contact" name="step4Vo.contact" rows="4" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="form-header h4">活动轨迹</h4>
+                                    <div class="m-t-md">
+                                        <p style="color: red">请在“人员管理->轨迹”功能页签中完善</p>
+                                    </div>
+                                    <h4 class="form-header h4">卫生学调查情况</h4>
+                                    <div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">卫生学调查情况：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step4Vo_hygiene" name="step4Vo.hygiene" rows="8" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="form-header h4">风险地点</h4>
+                                    <div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">风险地点：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step4Vo_danger" name="step4Vo.danger" rows="8" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="step-5" class="tab-pane" role="tabpanel" aria-labelledby="step-5">
+                                <h4 class="form-header h4">密接者调查情况</h4>
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step5Vo_id" name="step5Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">密接者调查情况：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step5Vo_contactInvestigation" name="step5Vo.contactInvestigation" rows="4" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <h4 class="form-header h4">次密接者调查情况</h4>
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">次密接者调查情况：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="step5Vo_secondaryContactInvestigation" name="step5Vo.secondaryContactInvestigation" rows="8" class="form-control" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-6" class="tab-pane" role="tabpanel" aria-labelledby="step-6">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step6Vo_id" name="step6Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">核酸检测情况：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="Step6Vo_nucleate" name="Step6Vo.nucleate" class="form-control" rows="10" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-7" class="tab-pane" role="tabpanel" aria-labelledby="step-7">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step7Vo_id" name="step7Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">暴露场所管控：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="Step7Vo_exposedPlaces" name="Step7Vo.exposedPlaces" class="form-control" rows="10" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-8" class="tab-pane" role="tabpanel" aria-labelledby="step-8">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step8Vo_id" name="step8Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">小结：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="Step8Vo_briefSummary" name="Step8Vo.briefSummary" class="form-control" rows="10" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-9" class="tab-pane" role="tabpanel" aria-labelledby="step-9">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step9Vo_id" name="step9Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">已采取措施：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="Step9Vo_takeSteps" name="Step9Vo.takeSteps" class="form-control" rows="10" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div id="step-10" class="tab-pane" role="tabpanel" aria-labelledby="step-10">
+                                <div>
+                                    <form class="form form-horizontal m-t">
+                                        <input type="hidden" id="step10Vo_id" name="step10Vo.id">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label is-required">下一步工作措施：</label>
+                                            <div class="col-sm-8">
+                                                <textarea id="Step10Vo_nextSteps" name="Step10Vo.nextSteps" class="form-control" rows="10" required></textarea>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: jquery-smartwizard-js" />
+<script th:src="@{/js/jquery.tmpl.js}"></script>
+<script th:inline="javascript">
+    var professionDatas = [[${@dict.getType('e_profession')}]];
+    var foptions = null;
+    $(document).ready(function() {
+        // 工具栏按钮
+        var btnFinish = $('<a id="btn-finish"></a>').text('完成')
+            .addClass('btn btn-info')
+            .on('click', function(){ submit(); });
+        var btnCancel = $('<a id="btn-cancel"></a>').text('取消')
+            .addClass('btn btn-danger')
+            .on('click', function(){ $('#smartwizard').smartWizard("reset"); });
+        // 下面两个按钮是为了因为插件默认的是botton,这里换成<a>,也可以选择用样式替换,或者不替换
+        var btnNext = $('<a id="btn-next"></a>').text('下一步')
+            .addClass('btn btn-info')
+            .on('click', function(){ $('#smartwizard').smartWizard("next");});
+        var btnPrev = $('<a id="btn-prev"></a>').text('上一步')
+            .addClass('btn btn-success disabled')
+            .on('click', function(){ $('#smartwizard').smartWizard("prev"); });
+        // 初始化表单向导组件
+        $('#smartwizard').smartWizard({
+            theme: 'arrows', // default, arrows, dots, progress
+            autoAdjustHeight : false, // 自动调整高度, 默认true
+            enableURLhash:false, //开启URL hash,开启后点击浏览器前进后退按钮会执行下一步和上一步操作
+            transition: {
+                animation: 'slide-horizontal', // Effect on navigation, none/fade/slide-horizontal/slide-vertical/slide-swing
+            },
+            toolbarSettings: {
+                showNextButton: false,// 因为上面自定义了下一步按钮, 所以隐藏掉插件自带的按钮, 如果不使用自定义按钮, 需要改为true或者去掉该属性
+                showPreviousButton: false,// 因为上面自定义了上一步按钮, 所以隐藏掉插件自带的按钮, 如果不使用自定义按钮, 需要改为true或者去掉该属性
+                toolbarExtraButtons: [btnCancel,btnPrev,btnNext,btnFinish]// 扩展的按钮集合
+            }
+        });
+    });
+
+    function submit(){
+        var data = {};
+        $('.form').each(function (index, form){
+            // 这里可以使用$.common.formToJSON(formId);  需要在form上加id
+            $.each($(form).serializeArray(), function(i, field) {
+                if(data[field.name]) {
+                    data[field.name] += ("," + field.value);
+                } else {
+                    data[field.name] = field.value;
+                }
+            });
+        });
+        // $.operate.saveModal("/report/addReport", JSON.stringify(data));
+        $.post('/report/addReport',data,function (data) {
+            if(data.code == 0){
+                $.modal.msgSuccess('保存成功');
+                // setTimeout(function () { closeTab(); }, 3000);
+            } else {
+                $.modal.msgSuccess('保存失败，请联系管理员！');
+            }
+        })
+    }
+    function closeTab() {
+        $.modal.closeTab("/report");
+    }
+    // 显示步骤时将触发事件
+    $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
+        // 下面按钮是快速操作栏的
+        $("#prev-btn").removeClass('disabled');
+        $("#next-btn").removeClass('disabled');
+        // 下面按钮是工具栏的
+        $("#btn-prev").removeClass('disabled');
+        $("#btn-next").removeClass('disabled');
+        $("#btn-finish").removeClass('disabled');
+        if(stepPosition === 'first') {
+            $("#prev-btn").addClass('disabled');// 快速操作栏（演示用）
+            $("#btn-prev").addClass('disabled');
+            $("#btn-finish").addClass('disabled');
+        } else if(stepPosition === 'last') {
+            $("#next-btn").addClass('disabled');// 快速操作栏（演示用）
+            $("#btn-next").addClass('disabled');
+        } else {
+            $("#prev-btn").removeClass('disabled');// 快速操作栏（演示用）
+            $("#next-btn").removeClass('disabled');// 快速操作栏（演示用）
+            $("#btn-prev").removeClass('disabled');
+            $("#btn-next").removeClass('disabled');
+            $("#btn-finish").addClass('disabled');
+        }
+    });
+
+    // 该事件在离开某个步骤之前触发
+    $("#smartwizard").on("leaveStep", function(e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) {
+        if(stepDirection == 'forward'){
+            var form = $("#step-" + (currentStepNumber + 1)).find('.form');
+            if(form.length > 0){
+                return form.validate().form();
+            }
+            return true;
+        }
+        return true;
+    });
+
+    $("#theme-selector").on("change", function() {
+        // Change theme
+        var options = {
+            theme : $(this).val()
+        };
+        $('#smartwizard').smartWizard("setOptions", options);
+        return true;
+    });
+
+    $("#reset-btn").on("click", function() {
+        // Reset wizard
+        $('#smartwizard').smartWizard("reset");
+        return true;
+    });
+
+    $("#prev-btn").on("click", function() {
+        // Navigate previous
+        $('#smartwizard').smartWizard("prev");
+        return true;
+    });
+
+    $("#next-btn").on("click", function() {
+        // Navigate next
+        $('#smartwizard').smartWizard("next");
+        return true;
+    });
+    //关联信息
+    function selectPerson(){
+        var options = {
+            title: '选择关联病例',
+            url: "report/showPerson",
+            callBack: doSubmit2
+        };
+        $.modal.openOptions(options);
+    }
+    function doSubmit2(index, layero){
+        //获取选中对象进行数据填充
+        var rowsData = layero.find("iframe")[0].contentWindow.getSelections();
+        //判断是否存在数据了
+        $.get('/report/checkPerson/'+rowsData.id,'',function (data) {
+            if(data.code == 0){
+                if(data.data > 0) {
+                    //存在
+                    $.modal.confirm(rowsData.name+"的信息已经录入完毕，是否要重新录入？", function() {
+                        showPerson(rowsData,1);
+                    });
+                } else {
+                    showPerson(rowsData,0);
+                }
+            } else {
+                //todo 出错提示
+                $.modal.msgError('选取失败')
+            }
+
+        });
+    }
+
+    function showPerson(rowsData,step) {
+        $("#e_id").val(rowsData.id);
+        $("#e_name").val(rowsData.name);
+        $("#e_gender").val(rowsData.gender == 0?'男':'女');
+        $("#e_profession").val($.table.selectDictLabel_NoSpan(professionDatas, rowsData.profession));
+        $("#e_profession2").val(rowsData.profession2);
+        $("#e_sfzh").val(rowsData.sfzh);
+        $("#e_domicile").val(rowsData.domicile);
+        $("#e_address").val(rowsData.address);
+        $("#e_vaccination").val(rowsData.vaccination);
+        $("#e_casesSource").val(rowsData.casesSource);
+        //请求数据覆盖
+        if(step == 1){
+            $.get('/report/getReport/'+rowsData.id,'',function (data) {
+                //开始赋值
+                let reportVo = data.data;
+                if(reportVo.step3Vo != null){
+                    $("#step3Vo_id").val(reportVo.step3Vo.id);
+                    $("#step3Vo_diagnosisProcess").html(reportVo.step3Vo.diagnosisProcess);
+                }
+                if(reportVo.step4Vo != null){
+                    $("#step4Vo_id").val(reportVo.step4Vo.id);
+                    $("#step4Vo_history").html(reportVo.step4Vo.history);
+                    $("#step4Vo_contact").html(reportVo.step4Vo.contact);
+                    $("#step4Vo_hygiene").html(reportVo.step4Vo.hygiene);
+                    $("#step4Vo_danger").html(reportVo.step4Vo.danger);
+                }
+                if(reportVo.step5Vo != null){
+                    $("#step5Vo_id").val(reportVo.step5Vo.id);
+                    $("#step5Vo_contactInvestigation").html(reportVo.step5Vo.contactInvestigation);
+                    $("#step5Vo_secondaryContactInvestigation").html(reportVo.step5Vo.secondaryContactInvestigation);
+                }
+                if(reportVo.step6Vo != null){
+                    $("#step6Vo_id").val(reportVo.step6Vo.id);
+                    $("#Step6Vo_nucleate").html(reportVo.step6Vo.nucleate);
+                }
+                if(reportVo.step7Vo != null){
+                    $("#step7Vo_id").val(reportVo.step7Vo.id);
+                    $("#Step7Vo_exposedPlaces").html(reportVo.step7Vo.exposedPlaces);
+                }
+                if(reportVo.step8Vo != null){
+                    $("#step8Vo_id").val(reportVo.step8Vo.id);
+                    $("#Step8Vo_briefSummary").html(reportVo.step8Vo.briefSummary);
+                }
+                if(reportVo.step9Vo != null){
+                    $("#step9Vo_id").val(reportVo.step9Vo.id);
+                    $("#Step9Vo_takeSteps").html(reportVo.step9Vo.takeSteps);
+                }
+                if(reportVo.step10Vo != null){
+                    $("#step10Vo_id").val(reportVo.step10Vo.id);
+                    $("#Step10Vo_nextSteps").html(reportVo.step10Vo.nextSteps);
+                }
+
+                let dataVO = reportVo.family;
+                let trackdata = [];
+                for (let i = 0; i < dataVO.length; i++) {
+                    trackdata.push({
+                        id:dataVO[i].id,
+                        relation: dataVO[i].relation,
+                        name: dataVO[i].name,
+                        gender: dataVO[i].gender,
+                        age: dataVO[i].age,
+                        sfzh: dataVO[i].sfzh,
+                        phone: dataVO[i].phone,
+                        profession: dataVO[i].profession,
+                        address: dataVO[i].address,
+                        domicile: dataVO[i].domicile,
+                        vaccination: dataVO[i].vaccination,
+                        testing: dataVO[i].testing,
+                        controlSituation: dataVO[i].controlSituation,
+                    })
+                }
+                foptions.data = trackdata;
+                $.table.init(foptions);
+            });
+        } else {
+            $.table.init(foptions);
+        }
+    }
+
+    $(function() {
+        // 初始化数据, 可以由后台传过来
+        foptions = {
+            data: [],
+            pagination: false,
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            sidePagination: "client",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'index',
+                    align: 'center',
+                    title: "序号",
+                    formatter: function (value, row, index) {
+                        var columnIndex = $.common.sprintf("<input type='hidden' name='index' value='%s'>", $.table.serialNumber(index));
+                        var columnId = $.common.sprintf("<input type='hidden' class='idFlag' name='family[%s].id' value='%s'>", index, row.id);
+                        return columnIndex + $.table.serialNumber(index) + columnId;
+                    }
+                },
+                {
+                    field: 'relation',
+                    align: 'center',
+                    title: '关系',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control familyrelation' type='text' name='family[%s].relation' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'name',
+                    align: 'center',
+                    title: '姓名',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control familyname' type='text' name='family[%s].name' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'gender',
+                    align: 'center',
+                    title: '性别',
+                    width:'100px',
+                    formatter: function(value, row, index) {
+                        var data = [{ index: index, gender: value }];
+                        return $("#genderTypeTpl").tmpl(data).html();
+                    }
+                },
+                {
+                    field: 'age',
+                    align: 'center',
+                    title: '年龄',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control familyage' type='text' name='family[%s].age' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'sfzh',
+                    align: 'center',
+                    title: '身份证',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control familysfzh' type='text' name='family[%s].sfzh' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'phone',
+                    align: 'center',
+                    title: '电话号码',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<input class='form-control familyphone' type='text' name='family[%s].phone' value='%s'>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'profession',
+                    align: 'center',
+                    title: '职业',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familyprofession' rows='1' name='family[%s].profession'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'address',
+                    align: 'center',
+                    title: '现住址',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familyaddress' rows='1' name='family[%s].address'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'domicile',
+                    align: 'center',
+                    title: '户籍地址',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familydomicile' rows='1' name='family[%s].domicile'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'vaccination',
+                    align: 'center',
+                    title: '疫苗接种情况',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familyvaccination' rows='1' name='family[%s].vaccination'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'testing',
+                    align: 'center',
+                    title: '检测情况',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familytesting' rows='1' name='family[%s].testing'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    field: 'controlSituation',
+                    align: 'center',
+                    title: '管控情况',
+                    formatter: function(value, row, index) {
+                        var html = $.common.sprintf("<textarea class='form-control familycontrolSituation' rows='1' name='family[%s].controlSituation'>%s</textarea>", index, value);
+                        return html;
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var value = $.common.isNotEmpty(row.index) ? row.index : $.table.serialNumber(index);
+                        var faId = $.common.isNotEmpty(row.id) ? row.id : -1;
+                        return '<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="sub.delRowByIndex(\'' + value + '\');deleteFamily(\'' + faId + '\');"><i class="fa fa-remove"></i>删除</a>';
+                    }
+                }]
+        };
+
+        // $.get('/epidemic/family/getTrackByeId/'+$('#eid').val(),'',function (data) {
+        //     let dataVO = data.data;
+        //     let trackdata = [];
+        //     for (let i = 0; i < dataVO.length; i++) {
+        //         trackdata.push({
+        //             id:dataVO[i].id,
+        //             activeTime: dataVO[i].activeTime,
+        //             activePlace: dataVO[i].activePlace,
+        //             longitude: dataVO[i].longitude,
+        //             latitude: dataVO[i].latitude,
+        //         })
+        //     }
+        //     options.data = trackdata;
+        //     $.table.init(options);
+        // });
+        //  $.table.init(foptions);
+    });
+
+    $.validator.addMethod("familyrelation", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyname", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familygender", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyage", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familysfzh", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyphone", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyprofession", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyaddress", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familydomicile", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familyvaccination", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familytesting", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+    $.validator.addMethod("familycontrolSituation", function(value, element) {
+        return !this.optional(element);
+    }, "必填。");
+
+    function addRow() {
+        var count = $("#" + table.options.id).bootstrapTable('getData').length;
+        var row = {
+            index: $.table.serialNumber(count),
+            relation: "",
+            name: "",
+            gender: "",
+            age: "",
+            sfzh: "",
+            phone: "",
+            profession: "",
+            address: "",
+            domicile: "",
+            vaccination: "",
+            testing: "",
+            controlSituation: "",
+
+        }
+        sub.addRow(row);
+    }
+    function deleteFamily(id) {
+        let ids = [];
+        //删除数据
+        if(id != -1){
+            //批量
+            if(id == -2){
+                ids = $.table.selectColumns("id");
+            }else{
+                //单个删除
+                ids.push(id);
+            }
+            $.get('/family/family/delFamilyByIds/'+ids,'',function (data) {
+                    if(data.code == 0){
+                        $.modal.msgSuccess('删除成功')
+                    } else {
+                        $.modal.msgError('删除失败')
+                    }
+            })
+        }
+    }
+</script>
+<script id="genderTypeTpl" type="text/x-jquery-tmpl">
+<div>
+<select class='form-control familygender' name='family[${index}].gender'>
+    <option value="">请选择</option>
+    <option value="0" {{if gender==="0"}}selected{{/if}}>男</option>
+    <option value="1" {{if gender==="1"}}selected{{/if}}>女</option>
+</select>
+</div>
+</script>
+</body>
+</html>

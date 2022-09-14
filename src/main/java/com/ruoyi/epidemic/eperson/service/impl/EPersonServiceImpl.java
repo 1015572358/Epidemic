@@ -135,7 +135,6 @@ public class EPersonServiceImpl implements IEPersonService
         int failureNum = 0;
         StringBuilder successMsg = new StringBuilder();
         StringBuilder failureMsg = new StringBuilder();
-        String operName = ShiroUtils.getLoginName();
         String yqbh = "";
         for (EPerson person : personList)
         {
@@ -298,5 +297,92 @@ public class EPersonServiceImpl implements IEPersonService
     @Override
     public List<EPerson> getRelationByIds(Long ryId) {
         return ePersonMapper.getRelationByIds(ryId);
+    }
+
+    @Override
+    public Map<String, Object> getSecondView(String chartParam) {
+        Map<String,Object> result = new HashMap<>();
+        List<Map<String,Object>> part1 = ePersonMapper.getTop10ByCommunity(chartParam);
+        List<Map<String,Object>> part2 = ePersonMapper.getGenderByConfirmd(chartParam);
+        List<Map<String,Object>> part3 = ePersonMapper.getProfessionByCommunity(chartParam);
+        List<Map<String,Object>> part4 = ePersonMapper.getReseauByCommunity(chartParam);
+        result.put("part1",part1);
+        result.put("part2",part2);
+        result.put("part3",part3);
+        result.put("part4",part4);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getThirdView(String chartParam) {
+        Map<String,Object> result = new HashMap<>();
+        List<Map<String,Object>> part1 = ePersonMapper.getTop10ByCasesSource(chartParam);
+        List<Map<String,Object>> part2 = ePersonMapper.getGenderByCasesSource(chartParam);
+        result.put("part1",part1);
+        result.put("part2",part2);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getFourView(String chartParam) {
+        Map<String,Object> result = new HashMap<>();
+        List<Map<String,Object>> part1 = ePersonMapper.getTop10ByGender(chartParam);
+        result.put("part1",part1);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getFiveView(String chartParam,String gender) {
+        Map<String,Object> result = new HashMap<>();
+        List<Map<String,Object>> part1 = ePersonMapper.getReseauByAge(chartParam.split("-")[0],chartParam.split("-")[1],gender);
+        result.put("part1",part1);
+        return result;
+    }
+
+    @Override
+    public List<EPerson> selectEPersonList_echarts(EPerson person) {
+        return ePersonMapper.selectEPersonList_echarts(person.getGender(),person.getLatitude().split("-")[0],person.getLatitude().split("-")[1]);
+    }
+
+    @Override
+    public Map<String, Object> getSixView(String chartParam) {
+        Map<String,Object> result = new HashMap<>();
+        List<Map<String,Object>> part1 = ePersonMapper.getTop10ByCommunity_wg(chartParam);
+        List<Map<String,Object>> part2 = ePersonMapper.getGenderByConfirmd_wg(chartParam);
+        List<Map<String,Object>> part3 = ePersonMapper.getProfessionByCommunity_wg(chartParam);
+        result.put("part1",part1);
+        result.put("part2",part2);
+        result.put("part3",part3);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getReportData(String startTime, String endTime) {
+        Map<String, Object> result = new HashMap<>();
+        //图一 病例特征
+        List<Map<String,Object>> part1 = ePersonMapper.getReportDataByGraphOne(startTime,endTime);
+        //图二 性别分布
+        List<Map<String,Object>> part2 = ePersonMapper.getReportDataByGraphTwo(startTime,endTime);
+        //图三 病例年龄分布
+        List<Map<String,Object>> part3 = ePersonMapper.getReportDataByGraphThree(startTime,endTime);
+        //图四 职业年龄分布
+        List<Map<String,Object>> part4 = ePersonMapper.getReportDataByGraphFour(startTime,endTime);
+        //图五 职业年龄分布
+        List<Map<String,Object>> part5 = ePersonMapper.getReportDataByGraphFive(startTime,endTime);
+        //图六初筛阳性病例 按照日统计
+        List<Map<String,Object>> part6 = ePersonMapper.getReportDataByGraphSix(startTime,endTime);
+        //图七初筛阳性病例 按照日统计
+        List<Map<String,Object>> part7 = ePersonMapper.getReportDataByGraphSeven(startTime,endTime);
+        //图八 社区分布占比
+        List<Map<String,Object>> part8 = ePersonMapper.getReportDataByGraphEight(startTime,endTime);
+        result.put("part1",part1);
+        result.put("part2",part2);
+        result.put("part3",part3);
+        result.put("part4",part4);
+        result.put("part5",part5);
+        result.put("part6",part6);
+        result.put("part7",part7);
+        result.put("part8",part8);
+        return result;
     }
 }

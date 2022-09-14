@@ -460,6 +460,67 @@ var table = {
                     }
                 });
             },
+
+            // 导入数据--密接人员
+            importMJExcel: function(formId, width, height,relationName,relationValue) {
+                table.set();
+                var currentId = $.common.isEmpty(formId) ? 'importTpl' : formId;
+                var _width = $.common.isEmpty(width) ? "400" : width;
+                var _height = $.common.isEmpty(height) ? "230" : height;
+                top.layer.open({
+                    type: 1,
+                    area: [_width + 'px', _height + 'px'],
+                    fix: false,
+                    //不固定
+                    maxmin: true,
+                    shade: 0.3,
+                    title: '导入[' + relationName + ']密接数据',
+                    content: $('#' + currentId).html(),
+                    btn: ['<i class="fa fa-check"></i> 导入', '<i class="fa fa-remove"></i> 取消'],
+                    // 弹层外区域关闭
+                    shadeClose: true,
+                    btn1: function(index, layero){
+                        layero.find('#relationValue').val(relationValue);
+                        var file = layero.find('#file').val();
+                        if (file == '' || (!$.common.endWith(file, '.xls') && !$.common.endWith(file, '.xlsx'))){
+                            $.modal.msgWarning("请选择后缀为 “xls”或“xlsx”的文件。");
+                            return false;
+                        }
+                        var index = top.layer.load(2, {shade: false});
+                        $.modal.disable();
+                        var formData = new FormData(layero.find('form')[0]);
+                        $.ajax({
+                            url: table.options.importUrl,
+                            data: formData,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            type: 'POST',
+                            success: function (result) {
+                                if (result.code == web_status.SUCCESS) {
+                                    $.modal.close(index);
+                                    $.modal.closeAll();
+                                    $.modal.alertSuccess(result.msg);
+                                    $.table.refresh();
+                                } else if (result.code == web_status.WARNING) {
+                                    $.modal.close(index);
+                                    $.modal.enable();
+                                    $.modal.alertWarning(result.msg)
+                                } else {
+                                    $.modal.close(index);
+                                    $.modal.enable();
+                                    $.modal.alertError(result.msg);
+                                }
+                            },
+                            complete: function () {
+                                layero.find('#file').val('');
+                            }
+                        });
+                    }
+                });
+            },
+
+
             // 刷新表格
             refresh: function(tableId, pageNumber, pageSize, url) {
                 var currentId = $.common.isEmpty(tableId) ? table.options.id : tableId;
@@ -529,6 +590,24 @@ var table = {
                     }
                 }
                 return distinct ? $.common.uniqueFn(rows) : rows;
+            },
+            // 回显数据字典——不带span标签
+            selectDictLabel_NoSpan: function(datas, value) {
+                if ($.common.isEmpty(datas) || $.common.isEmpty(value)) {
+                    return '';
+                }
+                var actions = [];
+                $.each(datas, function(index, dict) {
+                    if (dict.dictValue == ('' + value)) {
+                        var listClass = $.common.equals("default", dict.listClass) || $.common.isEmpty(dict.listClass) ? "" : "badge badge-" + dict.listClass;
+                        actions.push($.common.sprintf("%s", dict.dictLabel));
+                        return false;
+                    }
+                });
+                if (actions.length === 0) {
+                    actions.push($.common.sprintf("%s", '--'))
+                }
+                return actions.join('');
             },
             // 回显数据字典
             selectDictLabel: function(datas, value) {
@@ -991,7 +1070,7 @@ var table = {
             },
             // 选卡页同一页签打开
             parentTab: function (title, url) {
-                var dataId = window.frameElement.getAttribute('data-id');modal/layer
+                var dataId = window.frameElement.getAttribute('data-id');
                 createMenuItem(url, title);
                 closeItem(dataId);
             },

@@ -43,7 +43,7 @@ public class EPerson extends BaseEntity
     private String gender;
 
     /** 身份证号 */
-    @NotBlank(message = "身份证号不能为空！")
+//    @NotBlank(message = "身份证号不能为空！")
     @Excel(name = "身份证号")
     private String sfzh;
 
@@ -52,8 +52,8 @@ public class EPerson extends BaseEntity
     @Excel(name = "年龄")
     private Long age;
 
-    /** 是否确诊 */
-    @Excel(name = "是否确诊",readConverterExp = "0=否,1=是,2=无症状")
+    /** 病例类型 */
+    @Excel(name = "病例类型",readConverterExp = "1=确诊病例,2=阳性监测")
     private String confirmd;
 
     /** 户籍地 */
@@ -72,12 +72,18 @@ public class EPerson extends BaseEntity
     @Excel(name = "网格分布")
     private String reseau;
 
-    /** 病历来源 */
+    /** 病例来源 */
     @Excel(name = "病例来源（发现方式）")
     private String casesSource;
 
+    /** 病例来源 */
+    @Excel(name = "临床严重程度",dictType = "e_clinical",combo = {"无症状感染病","轻症病例","普通肺炎","重症肺炎","危重症肺炎"})
+    @NotNull(message = "临床严重程度不允许为空")
+    private String clinicalSeverityLevel;
+
     /** 职业 */
-    @Excel(name = "职业")
+    @Excel(name = "职业",dictType = "e_profession",combo = {"幼托儿童","散居儿童","学生（大中小学）","教师","保育员及保姆","餐饮食品业","公共场所服务员","商业服务","医务人员","工人","民工","农民","牧民","渔（船）民","海员及长途驾驶员","干部职员","离退人员","家务及待业","不详","其它"})
+    @NotNull(message = "职业不允许为空")
     private String profession;
 
     /** 职业（副） */
@@ -100,8 +106,8 @@ public class EPerson extends BaseEntity
     @Excel(name = "初筛阳性报告时间（日）")
     private Date firstPositiveReportTime;
 
-    /** 关联病历 */
-    @Excel(name = "关联病历")
+    /** 关联病例 */
+    @Excel(name = "关联病例")
     private String relatedCases;
 
     /** 疫苗接种 */
@@ -225,6 +231,14 @@ public class EPerson extends BaseEntity
     public void setDomicile(String domicile)
     {
         this.domicile = domicile;
+    }
+
+    public String getClinicalSeverityLevel() {
+        return clinicalSeverityLevel;
+    }
+
+    public void setClinicalSeverityLevel(String clinicalSeverityLevel) {
+        this.clinicalSeverityLevel = clinicalSeverityLevel;
     }
 
     public String getDomicile()
@@ -467,6 +481,7 @@ public class EPerson extends BaseEntity
                 .append("age", getAge())
                 .append("confirmd", getConfirmd())
                 .append("domicile", getDomicile())
+                .append("clinicalSeverityLevel",getClinicalSeverityLevel())
                 .append("address", getAddress())
                 .append("community", getCommunity())
                 .append("reseau", getReseau())

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>流行病学调查报告</title>
+    <th:block th:include="include :: header('调查报告')" />
+    <th:block th:include="include :: footer" />
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeIn">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="modal-header" style="text-align: center;font-weight: bold">
+                <h2 class="modal-title">[[${report.ePerson.name}]]的流行病学调查报告</h2>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div class="panel-body">
+                        <div class="panel-group" id="accordion">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h5 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">基本情况</a>
+                                    </h5>
+                                </div>
+                                <div id="collapseOne" class="panel-collapse collapse in">
+                                    <div class="panel-body">
+                                        [[${report.ePerson.name}]],[[${report.ePerson.gender == 0?'男':'女'}]],[[${report.ePerson.age}]]岁，职业：<script th:inline="javascript">var professionDatas = [[${@dict.getType('e_profession')}]]; document.write($.table.selectDictLabel_NoSpan(professionDatas, [[${report.ePerson.profession}]]))</script> ，职业（副）：[[${report.ePerson.profession2}]];
+                                        身份证号码：[[${report.ePerson.sfzh}]],现住址：[[${report.ePerson.address}]];户籍地址：[[${report.ePerson.domicile}]];疫苗接种：[[${report.ePerson.vaccination}]]。
+                                    </div>
+                                    <div class="panel-body">
+                                        <h4>同住成员</h4>
+                                        <ol>
+                                            <li th:each="family:${report.family}">[[${family.relation}]]:[[${family.name}]],[[${family.gender == 0?'男':'女'}]],[[${family.age}]]岁，身份证号码:[[${family.sfzh}]],
+                                            电话号码：[[${family.phone}]]，职业：[[${family.profession}]]，现住址：[[${family.address}]]；户籍地址：[[${family.domicile}]]；疫苗接种情况：[[${family.vaccination}]]。核酸检测情况：[[${family.testing}]]，管控情况：[[${family.controlSituation}]]</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">发现及就诊经过</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseTwo" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <span style="font-weight: bold">发现方式：</span>[[${report.step3Vo.casesSource}]]。<br>
+                                        <span style="font-weight: bold">发病及就诊过程：</span>[[${report.step3Vo.diagnosisProcess}]]。
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">流行病学调查情况</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseThree" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <h3>接触史调查情况</h3>
+                                        <span style="font-weight: bold">旅居史：</span>[[${report.step4Vo.history}]]。<br>
+                                        <span style="font-weight: bold">接触史：</span>[[${report.step4Vo.contact}]]
+                                        <h3>活动轨迹</h3>
+                                        <ul>
+                                            <li th:each="track:${report.eTracks}">[[${#dates.format(track.activeTime, 'yyyy-MM-dd HH:mm:ss')}]],[[${track.activePlace}]]。</li>
+                                        </ul>
+                                        <h3>卫生学调查情况</h3>
+                                        <span th:text="${report.step4Vo.hygiene}"></span>
+                                        <h3>风险地点</h3>
+                                        <span th:text="${report.step4Vo.danger}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">密接者和次密接者调查</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseFour" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <h3>密接者调查情况</h3>
+                                        <span th:text="${report.step5Vo.contactInvestigation}"></span>
+                                        <h3>次密接者调查情况</h3>
+                                        <span th:text="${report.step5Vo.secondaryContactInvestigation}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">实验室检测情况</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseFive" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <h3>核酸检测情况</h3>
+                                        <span th:text="${report.step6Vo.nucleate}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">暴露场所管控</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseSix" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <span th:text="${report.step7Vo.exposedPlaces}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">暴露场所管控</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseSeven" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <span th:text="${report.step8Vo.briefSummary}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseEight">已采取措施</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseEight" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <span th:text="${report.step9Vo.takeSteps}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseNine">下一步工作措施</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseNine" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <span th:text="${report.step10Vo.nextSteps}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTen">密接总表</a>
+                                    </h4>
+                                </div>
+                                <div id="collapseTen" class="panel-collapse collapse">
+                                    <div class="panel-body" id="mjzb">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var symptomDatas = [[${@dict.getType('e_yes_no')}]];
+    $(function() {
+        var options = {
+            id:"mjzb",
+            url: "/contiguity/contiguity/list",
+            sidePagination: "client",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            columns: [
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'sfzh',
+                    title: '身份证号/护照号'
+                },
+                {
+                    field: 'gender',
+                    title: '性别',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(genderDatas, value);
+                    }
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'phone',
+                    title: '联系方式'
+                },
+                {
+                    field: 'town',
+                    title: '乡镇'
+                },
+                {
+                    field: 'community',
+                    title: '社区'
+                },
+                {
+                    field: 'apartment',
+                    title: '门牌号'
+                },
+                {
+                    field: 'gridDistribution',
+                    title: '网格分布'
+                },
+                {
+                    field: 'contactSite',
+                    title: '接触地点及方式'
+                },
+                {
+                    field: 'contactFrequency',
+                    title: '接触频率'
+                },
+                {
+                    field: 'relation',
+                    title: '与病例关系'
+                },
+                {
+                    field: 'symptom',
+                    title: '是否出现临床症状',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(symptomDatas, value);
+                    }
+                },
+                {
+                    field: 'remark',
+                    title: '备注'
+                }
+                ]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

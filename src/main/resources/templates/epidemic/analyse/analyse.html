@@ -63,7 +63,7 @@
         <div class="col-sm-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>网格分布（点击可缩放）</h5>
+                    <h5>网格分布（可缩放）</h5>
                 </div>
                 <div class="ibox-content">
                     <div class="echarts" id="echarts3"></div>
@@ -558,21 +558,41 @@
 
 
                     var myChart1 = echarts.init(document.getElementById('echarts1'));
+                    //点击事件
+                    myChart1.on('click',function (p) {
+                        _this.myChart1Click(p.name);
+                    })
                     var myChart2 = echarts.init(document.getElementById('echarts2'));
+                    //点击事件
+                    myChart2.on('click',function (p) {
+                        _this.myChart2Click(p.name);
+                    })
                     var myChart3 = echarts.init(document.getElementById('echarts3'));
+                    //点击事件
+                    myChart3.on('click',function (p) {
+                        _this.myChart3Click(p.name);
+                    })
                     var myChart4 = echarts.init(document.getElementById('echarts4'));
+                    //点击事件
+                    myChart4.on('click',function (p) {
+                        _this.myChart4Click(p.name);
+                    })
                     var myChart5 = echarts.init(document.getElementById('echarts5'));
+                    //点击事件
+                    myChart5.on('click',function (p) {
+                        _this.myChart5Click(p.name,1-p.seriesIndex);
+                    })
 
                     // Enable data zoom when user click bar.
-                    const zoomSize = 6;
-                    myChart3.on('click', function (params) {
-                        myChart3.dispatchAction({
-                            type: 'dataZoom',
-                            startValue: _this.option3.xAxis.data[Math.max(params.dataIndex - zoomSize / 2, 0)],
-                            endValue:
-                                _this.option3.xAxis.data[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
-                        });
-                    });
+                    // const zoomSize = 6;
+                    // myChart3.on('click', function (params) {
+                    //     myChart3.dispatchAction({
+                    //         type: 'dataZoom',
+                    //         startValue: _this.option3.xAxis.data[Math.max(params.dataIndex - zoomSize / 2, 0)],
+                    //         endValue:
+                    //             _this.option3.xAxis.data[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+                    //     });
+                    // });
 
 
 
@@ -593,6 +613,21 @@
                     myChart4.setOption(_this.option4);
                     myChart5.setOption(_this.option5);
                 });
+            },
+            myChart1Click(name){
+                $.modal.open(name, "/analyse/showMyChart1/"+name, '1800', '850');
+            },
+            myChart2Click(name){
+                $.modal.open(name, "/analyse/showMyChart2/"+name, '1800', '850');
+            },
+            myChart3Click(name){
+                $.modal.open(name, "/analyse/showMyChart3/"+name, '1800', '850');
+            },
+            myChart4Click(name){
+                $.modal.open(name, "/analyse/showMyChart4/"+name, '1800', '850');
+            },
+            myChart5Click(name,gender){
+                $.modal.open(name, "/analyse/showMyChart5/"+name+"/"+gender, '1800', '850');
             },
         }
 

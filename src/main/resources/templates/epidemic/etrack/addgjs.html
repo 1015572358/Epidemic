@@ -57,7 +57,9 @@
                     <div class="form-group">
                         <label class="col-sm-4 control-label">职业：</label>
                         <div class="col-sm-8">
-                            <textarea name="profession" class="form-control" readonly>[[*{profession}]]</textarea>
+                            <select name="gender" class="form-control m-b" th:with="type=${@dict.getType('e_profession')}" readonly>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{profession}"></option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -94,7 +96,7 @@
             <div class="row">
                 <div class="col-sm-12">
                     <button type="button" class="btn btn-white btn-sm" onclick="addRow()"><i class="fa fa-plus"> 增加</i></button>
-                    <button type="button" class="btn btn-white btn-sm" onclick="sub.delRow()"><i class="fa fa-minus"> 删除</i></button>
+                    <button type="button" class="btn btn-white btn-sm" onclick="deleteTrack(-2);sub.delRow()"><i class="fa fa-minus"> 删除</i></button>
                     <div class="col-sm-12 select-table table-striped">
 					    <table id="bootstrap-table"></table>
 					</div>
@@ -152,7 +154,7 @@
 		            title: '地点/事件',
                     width:'350px',
 		            formatter: function(value, row, index) {
-		            	var html = $.common.sprintf("<textarea class='form-control etrackactivePlace' name='etrack[%s].activePlace'>%s</textarea>", index, value);
+		            	var html = $.common.sprintf("<textarea class='form-control etrackactivePlace' rows='1' name='etrack[%s].activePlace'>%s</textarea>", index, value);
 		        		return html;
                     }
 		        },
@@ -180,7 +182,8 @@
                     align: 'center',
                     formatter: function(value, row, index) {
                     	var value = $.common.isNotEmpty(row.index) ? row.index : $.table.serialNumber(index);
-                        return '<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="sub.delRowByIndex(\'' + value + '\')"><i class="fa fa-remove"></i>删除</a>';
+                        var faId = $.common.isNotEmpty(row.id) ? row.id : -1;
+                        return '<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="sub.delRowByIndex(\'' + value + '\');deleteTrack(\'' + faId + '\');"><i class="fa fa-remove"></i>删除</a>';
                     }
                 }]
 		    };
@@ -217,13 +220,8 @@
         
         /* 主子表-提交 */
         function submitHandler(index, layero){
-            let idArr = [];
             if ($.validate.form()) {
-                $("#bootstrap-table").find("input[class='idFlag']").each(function (){
-                    idArr.push($(this).val());
-                });
                 var data = $("#form-add").serializeArray();
-                data.push({name:"idArr",value:idArr});
                 $.operate.saveModal("/epidemic/etrack/addPL", data);
             }
         }
@@ -238,6 +236,27 @@
                 latitude: "",
             }
         	sub.addRow(row);
+        }
+
+        function deleteTrack(id) {
+            let ids = [];
+            //删除数据
+            if(id != -1){
+                //批量
+                if(id == -2){
+                    ids = $.table.selectColumns("id");
+                }else{
+                    //单个删除
+                    ids.push(id);
+                }
+                $.get('/epidemic/etrack/delTrackByIds/'+ids,'',function (data) {
+                    if(data.code == 0){
+                        $.modal.msgSuccess('删除成功')
+                    } else {
+                        $.modal.msgError('删除失败')
+                    }
+                })
+            }
         }
         
         $("#bootstrap-table").on("post-body.bs.table", function (e, args) {

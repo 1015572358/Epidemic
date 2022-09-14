@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.family.mapper.EFamilyMapper">
+
+    <resultMap type="com.ruoyi.epidemic.family.domain.EFamily" id="EFamilyResult">
+        <result property="id" column="id"/>
+        <result property="eId" column="e_id"/>
+        <result property="relation" column="relation"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="sfzh" column="sfzh"/>
+        <result property="phone" column="phone"/>
+        <result property="profession" column="profession"/>
+        <result property="address" column="address"/>
+        <result property="domicile" column="domicile"/>
+        <result property="vaccination" column="vaccination"/>
+        <result property="testing" column="testing"/>
+        <result property="controlSituation" column="control_situation"/>
+    </resultMap>
+
+    <sql id="selectEFamilyVo">
+        select id,
+               e_id,
+               relation,
+               name,
+               gender,
+               age,
+               sfzh,
+               phone,
+               profession,
+               address,
+               domicile,
+               vaccination,
+               testing,
+               control_situation
+        from e_family
+    </sql>
+
+    <select id="selectEFamilyList" parameterType="com.ruoyi.epidemic.family.domain.EFamily" resultMap="EFamilyResult">
+        <include refid="selectEFamilyVo"/>
+        <where>
+            <if test="eId != null  and eId != ''">and e_id = #{eId}</if>
+            <if test="name != null  and name != ''">and name like concat('%', #{name}, '%')</if>
+            <if test="sfzh != null  and sfzh != ''">and sfzh like concat('%', #{sfzh}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectEFamilyById" parameterType="Long" resultMap="EFamilyResult">
+        <include refid="selectEFamilyVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertEFamily" parameterType="com.ruoyi.epidemic.family.domain.EFamily" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into e_family
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eId != null">e_id,</if>
+            <if test="relation != null">relation,</if>
+            <if test="name != null">name,</if>
+            <if test="gender != null">gender,</if>
+            <if test="age != null">age,</if>
+            <if test="sfzh != null">sfzh,</if>
+            <if test="phone != null">phone,</if>
+            <if test="profession != null">profession,</if>
+            <if test="address != null">address,</if>
+            <if test="domicile != null">domicile,</if>
+            <if test="vaccination != null">vaccination,</if>
+            <if test="testing != null">testing,</if>
+            <if test="controlSituation != null">control_situation,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eId != null">#{eId},</if>
+            <if test="relation != null">#{relation},</if>
+            <if test="name != null">#{name},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="age != null">#{age},</if>
+            <if test="sfzh != null">#{sfzh},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="profession != null">#{profession},</if>
+            <if test="address != null">#{address},</if>
+            <if test="domicile != null">#{domicile},</if>
+            <if test="vaccination != null">#{vaccination},</if>
+            <if test="testing != null">#{testing},</if>
+            <if test="controlSituation != null">#{controlSituation},</if>
+        </trim>
+    </insert>
+    <insert id="insertEFamilys">
+        insert into e_family
+        (id,e_id,relation,name,gender,age,sfzh,phone,profession,address,domicile,vaccination,testing,control_situation)
+        values
+        <foreach collection="list" separator="," item="p">
+            (#{p.id},#{e_id},#{p.relation},#{p.name},#{p.gender},#{p.age},#{p.sfzh},#{p.phone},#{p.profession},#{p.address},#{p.domicile},#{p.vaccination},#{p.testing},#{p.controlSituation})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        relation=values(relation),
+        name=values(name),
+        gender=values(gender),
+        age=values(age),
+        sfzh=values(sfzh),
+        phone=values(phone),
+        profession=values(profession),
+        address=values(address),
+        domicile=values(domicile),
+        vaccination=values(vaccination),
+        testing=values(testing),
+        control_situation=values(control_situation)
+    </insert>
+
+    <update id="updateEFamily" parameterType="com.ruoyi.epidemic.family.domain.EFamily">
+        update e_family
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eId != null">e_id = #{eId},</if>
+            <if test="relation != null">relation = #{relation},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="sfzh != null">sfzh = #{sfzh},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="profession != null">profession = #{profession},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="domicile != null">domicile = #{domicile},</if>
+            <if test="vaccination != null">vaccination = #{vaccination},</if>
+            <if test="testing != null">testing = #{testing},</if>
+            <if test="controlSituation != null">control_situation = #{controlSituation},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEFamilyById" parameterType="Long">
+        delete
+        from e_family
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteEFamilyByIds" parameterType="String">
+        delete from e_family where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="delFamilyByIds">
+        delete from e_family where id in
+<foreach collection="ids" item="p" open="(" close=")" separator=",">
+#{p}
+</foreach>
+    </delete>
+
+</mapper>

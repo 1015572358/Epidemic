@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.epidemic.report.mapper.ReportMapper">
+
+    <insert id="insertStep3Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step3Vo">
+        insert into step3vo (id, e_id, cases_source, diagnosis_process)
+        values (#{step3Vo.id}, #{eId}, #{step3Vo.casesSource}, #{step3Vo.diagnosisProcess}) ON DUPLICATE KEY
+        UPDATE
+            e_id=
+        values (e_id), cases_source=
+        values (cases_source), diagnosis_process=
+        values (diagnosis_process)
+    </insert>
+    <insert id="insertStep4Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step4Vo">
+        insert into step4vo (id, e_id, history, contact, hygiene, danger)
+        values (#{step4Vo.id}, #{eId}, #{step4Vo.history}, #{step4Vo.contact}, #{step4Vo.hygiene},
+                #{step4Vo.danger}) ON DUPLICATE KEY
+        UPDATE
+            history=
+        values (history), contact=
+        values (contact), hygiene=
+        values (hygiene), danger=
+        values (danger)
+    </insert>
+    <insert id="insertStep5Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step5Vo">
+        insert into step5vo (id, e_id, contact_investigation, secondary_contact_investigation)
+        values (#{step5Vo.id}, #{eId}, #{step5Vo.contactInvestigation},
+                #{step5Vo.secondaryContactInvestigation}) ON DUPLICATE KEY
+        UPDATE
+            contact_investigation=
+        values (contact_investigation), secondary_contact_investigation=
+        values (secondary_contact_investigation)
+    </insert>
+    <insert id="insertStep6Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step6Vo">
+        insert into step6vo (id, e_id, nucleate)
+        values (#{step6Vo.id}, #{eId}, #{step6Vo.nucleate}) ON DUPLICATE KEY
+        UPDATE
+            nucleate=
+        values (nucleate)
+    </insert>
+    <insert id="insertStep7Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step7Vo">
+        insert into step7vo (id, e_id, exposed_places)
+        values (#{step7Vo.id}, #{eId}, #{step7Vo.exposedPlaces}) ON DUPLICATE KEY
+        UPDATE
+            exposed_places=
+        values (exposed_places)
+    </insert>
+    <insert id="insertStep8Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step8Vo">
+        insert into step8vo (id, e_id, brief_summary)
+        values (#{step8Vo.id}, #{eId}, #{step8Vo.briefSummary}) ON DUPLICATE KEY
+        UPDATE
+            brief_summary=
+        values (brief_summary)
+    </insert>
+    <insert id="insertStep9Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step9Vo">
+        insert into step9vo (id, e_id, take_steps)
+        values (#{step9Vo.id}, #{eId}, #{step9Vo.takeSteps}) ON DUPLICATE KEY
+        UPDATE
+            take_steps=
+        values (take_steps)
+    </insert>
+    <insert id="insertStep10Vo" parameterType="com.ruoyi.epidemic.report.vo.ReportVo$Step10Vo">
+        insert into step10vo (id, e_id, next_steps)
+        values (#{step10Vo.id}, #{eId}, #{step10Vo.nextSteps}) ON DUPLICATE KEY
+        UPDATE
+            next_steps=
+        values (next_steps)
+    </insert>
+    <select id="checkPerson" resultType="int">
+        select count(*)
+        from step3vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep3VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step3Vo">
+        select id,e_id,cases_source 'casesSource',diagnosis_process 'diagnosisProcess'
+        from step3vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep4VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step4Vo">
+        select *
+        from step4vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep5VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step5Vo">
+        select id,e_id,contact_investigation 'contactInvestigation',secondary_contact_investigation 'secondaryContactInvestigation'
+        from step5vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep6VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step6Vo">
+        select *
+        from step6vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep7VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step7Vo">
+        select id,e_id,exposed_places 'exposedPlaces'
+        from step7vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep8VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step8Vo">
+        select id,e_id,brief_summary 'briefSummary'
+        from step8vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep9VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step9Vo">
+        select id,e_id,take_steps 'takeSteps'
+        from step9vo
+        where e_id = #{ryId}
+    </select>
+    <select id="getStep10VoByEid" resultType="com.ruoyi.epidemic.report.vo.ReportVo$Step10Vo">
+        select id,e_id,next_steps 'nextSteps'
+        from step10vo
+        where e_id = #{ryId}
+    </select>
+</mapper>

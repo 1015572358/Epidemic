@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>数据分析下钻</title>
+    <script type="text/javascript" th:src="@{/BMap/vue.js}"></script>
+    <script type="text/javascript" th:src="@{/BMap/echarts.min.js}"></script>
+    <th:block th:include="include :: header('数据分析下钻')" />
+    <style>
+        .echarts{
+            height: 400px;
+        }
+        .echarts-table{
+            height: 450px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>职业TOP 10</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="echarts" id="echarts1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>数据列表</h5>
+                </div>
+                <div class="ibox-content select-table table-striped">
+                    <div class="echarts-table">
+                        <table id="bootstrap-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            param:'',
+            option1: {
+                //图标位置
+                grid: {
+                    // top: '20%',
+                    left: '25%'
+                },
+                xAxis: {
+                    show: false
+                },
+                yAxis: [{
+                    show: true,
+                    data: [],
+                    inverse: true,
+                    axisLine: {
+                        show: false
+                    },
+                    splitLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    },
+                    axisLabel: {
+                        color: '#333',
+                        formatter: (value, index) => {
+                            return [
+                                `{lg|${index+1}}  ` + '{title|' + value + '} '
+                            ].join('\n')
+                        },
+                        rich: {
+                            lg: {
+                                backgroundColor: '#8d7fec',
+                                color: '#fff',
+                                borderRadius: 15,
+                                padding: 2,
+                                align: 'center',
+                                width: 15,
+                                height: 15
+                            },
+                            title:{
+                                backgroundColor: '#8d7fec',
+                                color: '#fff',
+                                width:150,
+                                align:'left',
+                                borderRadius: 5,
+                                padding: 5,
+                            }
+                        }
+                    },
+                }],
+                series: [{
+                    name: '条',
+                    type: 'bar',
+                    yAxisIndex: 0,
+                    data: [],
+                    barWidth: 10,
+                    label: {
+                        normal: {
+                            show: true,
+                            position: 'right',
+                            textStyle: {
+                                color: '#333',
+                                fontSize: '16',
+                            }
+                        }
+                    },
+                    itemStyle: {
+                        normal: {
+                            barBorderRadius: 20,
+                            color: function(params) {
+                                var myColor = ['#1089E7', '#F57474', '#56D0E3', '#1089E7', '#F57474', '#56D0E3', '#F8B448', '#8B78F6', '#F8B448', '#8B78F6'];
+                                var num = myColor.length;
+                                return myColor[params.dataIndex % num]
+                            },
+                            // 渐变色
+                            // color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                            // offset: 0,
+                            // color: 'rgba(0,255,0)'
+                            // }, {
+                            // offset: 1,
+                            // color: 'rgb(215 ,255,0)'
+                            // }]),
+                        }
+                    },
+
+                },
+                ]
+            },
+        },
+        created:function (){
+            let chartParam = '[[${chartParam}]]'
+            this.param = chartParam
+            this.queryView();
+        },
+
+        methods:{
+            queryView(){
+                let _this = this;
+                $.get("/analyse/secondView_chart4/"+_this.param, {}, function (data) {
+                    if(data.code == 0){
+                        data.data.part1.forEach(function (item) {
+                            _this.option1.series[0].data.push(item.snum);
+                            _this.option1.yAxis[0].data.push(item.profession);
+                        });
+
+                        var myChart1 = echarts.init(document.getElementById('echarts1'));
+                        //自适应
+                        window.addEventListener('resize', function() {
+                            myChart1.resize();
+                        });
+                        myChart1.setOption(_this.option1);
+                    } else {
+                        //todo 提示错误信息
+                        $.modal.alertError('数据查询失败！')
+                    }
+                });
+            },
+        }
+
+    });
+</script>
+<script th:inline="javascript">
+    var genderDatas = [[${@dict.getType('sys_user_sex')}]];
+    var confirmdDatas = [[${@dict.getType('e_confirm')}]];
+    var quarantineDatas = [[${@dict.getType('e_yes_no')}]];
+    var professionDatas = [[${@dict.getType('e_profession')}]];
+    var prefix = ctx + "report";
+
+    $(function() {
+        var options = {
+            url: "/epidemic/eperson/list",
+            modalName: "阳性人员",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            queryParams: queryParams,
+            columns: [
+                {
+                    field: 'id',
+                    title: '主键',
+                    visible: false
+                },
+                {
+                    field: 'name',
+                    title: '姓名'
+                },
+                {
+                    field: 'gender',
+                    title: '性别',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(genderDatas, value);
+                    }
+                },
+                {
+                    field: 'age',
+                    title: '年龄'
+                },
+                {
+                    field: 'sfzh',
+                    title: '身份证号'
+                },
+                {
+                    field: 'confirmd',
+                    title: '病例类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(confirmdDatas, value);
+                    }
+                },
+                {
+                    field: 'community',
+                    title: '所在社区'
+                },
+                {
+                    field: 'reseau',
+                    title: '网格'
+                },
+                {
+                    field: 'profession',
+                    title: '职业',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(professionDatas, value);
+                    }
+                },
+                {
+                    field: 'profession2',
+                    title: '职业（副）'
+                },
+            ]
+        };
+        $.table.init(options);
+    });
+
+    function queryParams(params) {
+        var search = $.table.queryParams(params);
+        search.gender = [[${chartParam}]];
+        return search;
+    }
+</script>
+</body>
+</html>
